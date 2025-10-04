@@ -1,0 +1,21 @@
+{
+	"name": "@tokenring-ai/checkpoint",
+	"version": "0.1.0",
+	"description": "Checkpoint service for storing Agent Checkpoints with a storage provider",
+	"dependencies": {
+		"@tokenring-ai/agent": "0.1.0"
+	},
+	"exports": {
+		".": "./index.ts",
+		"./*": "./*.ts"
+	},
+	"types": "./index.ts",
+	"license": "MIT",
+	"scripts": {
+		"build": "tsc -p tsconfig.tson"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"type": "module"
+}
