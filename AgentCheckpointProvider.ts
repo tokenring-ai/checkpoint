@@ -1,4 +1,4 @@
-import {AgentCheckpointData} from "@tokenring-ai/agent/Agent";
+import {AgentCheckpointData} from "@tokenring-ai/agent/types";
 
 export interface NamedAgentCheckpoint extends AgentCheckpointData {
 	name: string;
