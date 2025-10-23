@@ -3,7 +3,8 @@
 	"version": "0.1.0",
 	"description": "Checkpoint service for storing Agent Checkpoints with a storage provider",
 	"dependencies": {
-		"@tokenring-ai/agent": "0.1.0"
+		"@tokenring-ai/agent": "0.1.0",
+  "@tokenring-ai/utility": "0.1.0"
 	},
 	"exports": {
 		".": "./index.ts",
