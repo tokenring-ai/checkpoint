@@ -1,7 +1,8 @@
-import type { TokenRingService } from "@tokenring-ai/agent/types";
+import {AgentLifecycleService} from "@tokenring-ai/agent";
 import Agent from "@tokenring-ai/agent/Agent";
+import type {TokenRingService} from "@tokenring-ai/agent/types";
 import KeyedRegistryWithSingleSelection from "@tokenring-ai/utility/KeyedRegistryWithSingleSelection";
-import type { AgentCheckpointProvider } from "./AgentCheckpointProvider.js";
+import type {AgentCheckpointProvider} from "./AgentCheckpointProvider.js";
 
 export default class AgentCheckpointService implements TokenRingService {
 	name = "AgentCheckpointService";
@@ -21,7 +22,7 @@ export default class AgentCheckpointService implements TokenRingService {
     this.checkpointProviders.getAllItemNames;
 
   async attach(agent: Agent): Promise<void> {
-    agent.hooks.enableItems("@tokenring-ai/checkpoint/autoCheckpoint");
+    agent.requireServiceByType(AgentLifecycleService).enableHooks(["@tokenring-ai/checkpoint/autoCheckpoint"], agent);
   }
 
 	async saveAgentCheckpoint(name: string, agent: Agent): Promise<string> {

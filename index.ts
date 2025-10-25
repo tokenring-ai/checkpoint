@@ -1,9 +1,10 @@
+import type {AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
+import {AgentCommandService, AgentLifecycleService} from "@tokenring-ai/agent";
 import {z} from "zod";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
 import * as chatCommands from "./chatCommands.ts";
 import * as hooks from "./hooks.ts";
 import packageJSON from "./package.json" with {type: "json"};
-import type {AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
 
 export const CheckpointPackageConfigSchema = z.object({
   defaultProvider: z.string(),
@@ -15,14 +16,18 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(agentTeam: AgentTeam) {
-    agentTeam.addChatCommands(chatCommands);
-    agentTeam.addHooks(packageJSON.name, hooks);
+    agentTeam.waitForService(AgentCommandService, agentCommandService =>
+      agentCommandService.addAgentCommands(chatCommands)
+    );
+    agentTeam.waitForService(AgentLifecycleService, lifecycleService =>
+      lifecycleService.addHooks(packageJSON.name, hooks)
+    );
     agentTeam.addServices(new AgentCheckpointService());
   },
 
   start(agentTeam: AgentTeam) {
     const config = agentTeam.getConfigSlice("checkpoint", CheckpointPackageConfigSchema);
-    agentTeam.services.requireItemByType(AgentCheckpointService).setActiveProviderName(config.defaultProvider);
+    agentTeam.requireService(AgentCheckpointService).setActiveProviderName(config.defaultProvider);
   }
 } as TokenRingPackage;
 

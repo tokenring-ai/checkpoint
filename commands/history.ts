@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import type { AgentCheckpointListItem } from "../AgentCheckpointProvider.js";
+import type {AgentCheckpointListItem} from "../AgentCheckpointProvider.js";
 import AgentCheckpointService from "../AgentCheckpointService.js";
 
 export const description: string = "/history - Browse agent checkpoints";
@@ -150,15 +150,10 @@ async function displayCheckpointDetails(
 
 		if (fullCheckpoint) {
 			agent.infoLine(`\n📋 Checkpoint State:`);
-			agent.infoLine(
-				`- Tools Enabled: ${fullCheckpoint.state.toolsEnabled.join(", ") || "None"}`,
-			);
-			agent.infoLine(
-				`- Hooks Enabled: ${fullCheckpoint.state.hooksEnabled.join(", ") || "None"}`,
-			);
-			agent.infoLine(
-				`- Agent State Keys: ${Object.keys(fullCheckpoint.state.agentState).join(", ") || "None"}`,
-			);
+      for (const [name, stateData] of Object.entries(fullCheckpoint.state.agentState)) {
+        agent.infoLine(`\n${name}:`);
+        agent.infoLine(`  ${JSON.stringify(stateData, null, 2).split('\n').join('\n  ')}`);
+      }
 		}
 
 		agent.infoLine(`\n--- End of Checkpoint Details ---\n`);
