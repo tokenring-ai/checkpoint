@@ -2,9 +2,12 @@
 
 ## Overview
 
-The `@tokenring-ai/checkpoint` package provides persistent state management for agents within the Token Ring Agent framework. It enables agents to save snapshots of their current state and restore them later, supporting workflow interruption, experimentation, and session recovery.
+The `@tokenring-ai/checkpoint` package provides persistent state management for agents within the Token Ring Agent
+framework. It enables agents to save snapshots of their current state and restore them later, supporting workflow
+interruption, experimentation, and session recovery.
 
 **Key Features:**
+
 - **State Snapshots**: Save complete agent state including chat history, tools, hooks, and custom state
 - **Multi-Provider Support**: Pluggable storage backends for checkpoint persistence
 - **Interactive Browsing**: Tree-based UI for exploring and restoring checkpoints
@@ -49,6 +52,7 @@ export default {
 Main service for checkpoint operations. Automatically installed when the package is registered.
 
 **Key Methods:**
+
 - `registerProvider(name, provider)` - Register a checkpoint storage provider
 - `getActiveProvider()` - Get the currently active storage provider
 - `getActiveProviderName()` - Get the name of the active provider
@@ -59,6 +63,7 @@ Main service for checkpoint operations. Automatically installed when the package
 - `listCheckpoints()` - List all available checkpoints
 
 **Example:**
+
 ```typescript
 import { AgentCheckpointService } from '@tokenring-ai/checkpoint';
 
@@ -112,6 +117,7 @@ type AgentCheckpointListItem = Omit<StoredAgentCheckpoint, "state">;
 ```
 
 **Checkpoint State Contains:**
+
 - `toolsEnabled` - Currently enabled tools
 - `hooksEnabled` - Currently enabled hooks
 - `agentState` - Custom agent state
@@ -139,6 +145,7 @@ export interface AgentCheckpointProvider {
 Manage agent checkpoints - create, restore, or browse with interactive tree selection.
 
 **Syntax:**
+
 ```
 /checkpoint [action] [args...]
 ```
@@ -146,6 +153,7 @@ Manage agent checkpoints - create, restore, or browse with interactive tree sele
 **Actions:**
 
 #### `create [label]`
+
 Create a checkpoint of the current agent state with an optional label.
 
 ```
@@ -154,6 +162,7 @@ Create a checkpoint of the current agent state with an optional label.
 ```
 
 #### `restore <id>`
+
 Restore agent state from a specific checkpoint by ID.
 
 ```
@@ -161,6 +170,7 @@ Restore agent state from a specific checkpoint by ID.
 ```
 
 #### `list` (default)
+
 Show interactive tree selection of all checkpoints, grouped by date. Select one to restore.
 
 ```
@@ -169,6 +179,7 @@ Show interactive tree selection of all checkpoints, grouped by date. Select one 
 ```
 
 **Examples:**
+
 ```
 /checkpoint create              # Create with default label
 /checkpoint create "Bug Fix"    # Create with custom label
@@ -177,6 +188,7 @@ Show interactive tree selection of all checkpoints, grouped by date. Select one 
 ```
 
 **Output:**
+
 - Shows checkpoint ID when created
 - Displays grouped checkpoints by date with timestamps
 - Indicates most recent checkpoints first
@@ -186,16 +198,19 @@ Show interactive tree selection of all checkpoints, grouped by date. Select one 
 Browse and view checkpoint history grouped by agent session.
 
 **Syntax:**
+
 ```
 /history
 ```
 
 Shows an interactive tree selection where checkpoints are grouped by:
+
 1. Agent ID (session)
 2. Individual checkpoints within each agent (sorted by creation time, newest first)
 
 **Display Information:**
 For each selected checkpoint:
+
 - Name and creation timestamp
 - Agent ID
 - Enabled tools and hooks
@@ -206,17 +221,20 @@ For each selected checkpoint:
 
 ### `autoCheckpoint`
 
-Automatically creates a checkpoint after each agent input is processed. Enabled by default when the package is installed.
+Automatically creates a checkpoint after each agent input is processed. Enabled by default when the package is
+installed.
 
 **Hook Point:** `afterAgentInputComplete`
 
 **Behavior:**
+
 - Triggered after agent successfully processes input
 - Uses the input message as the checkpoint label
 - Runs silently without interrupting workflow
 - Can be disabled via agent hook management
 
 **Configuration:**
+
 ```typescript
 // Disable auto-checkpointing
 agent.hooks.disableItems("@tokenring-ai/checkpoint/autoCheckpoint");
@@ -317,6 +335,7 @@ agentTeam.registerPackages([packageInfo]);
 ```
 
 **Automatically Provides:**
+
 - Chat commands (`/checkpoint`, `/history`)
 - Auto-checkpoint hook
 - `AgentCheckpointService` service instance
@@ -345,8 +364,8 @@ The package defines the interface; storage providers are implemented separately:
 1. **Regular Checkpoints**: Use auto-checkpointing for frequent automatic saves
 2. **Named Checkpoints**: Create named checkpoints at logical decision points
 3. **Storage Selection**: Choose appropriate provider for your use case:
-   - Memory for testing/experimentation
-   - Database for production deployments
+ - Memory for testing/experimentation
+ - Database for production deployments
 4. **Cleanup**: Periodically list and remove old checkpoints to manage storage
 5. **Error Handling**: Always catch restore errors for graceful degradation
 

@@ -5,8 +5,8 @@ import KeyedRegistryWithSingleSelection from "@tokenring-ai/utility/KeyedRegistr
 import type {AgentCheckpointProvider} from "./AgentCheckpointProvider.js";
 
 export default class AgentCheckpointService implements TokenRingService {
-	name = "AgentCheckpointService";
-	description = "Persists agent state to a storage provider";
+  name = "AgentCheckpointService";
+  description = "Persists agent state to a storage provider";
 
   private checkpointProviders =
     new KeyedRegistryWithSingleSelection<AgentCheckpointProvider>();
@@ -25,22 +25,22 @@ export default class AgentCheckpointService implements TokenRingService {
     agent.requireServiceByType(AgentLifecycleService).enableHooks(["@tokenring-ai/checkpoint/autoCheckpoint"], agent);
   }
 
-	async saveAgentCheckpoint(name: string, agent: Agent): Promise<string> {
-		return await this.checkpointProviders.getActiveItem().storeCheckpoint({
-			name,
-			...agent.generateCheckpoint(),
-		});
-	}
+  async saveAgentCheckpoint(name: string, agent: Agent): Promise<string> {
+    return await this.checkpointProviders.getActiveItem().storeCheckpoint({
+      name,
+      ...agent.generateCheckpoint(),
+    });
+  }
 
-	async restoreAgentCheckpoint(id: string, agent: Agent): Promise<void> {
-		const checkpoint = await this.checkpointProviders.getActiveItem().retrieveCheckpoint(id);
-		if (!checkpoint) {
-			throw new Error(`Checkpoint ${id} not found`);
-		}
-		agent.restoreCheckpoint(checkpoint);
-	}
+  async restoreAgentCheckpoint(id: string, agent: Agent): Promise<void> {
+    const checkpoint = await this.checkpointProviders.getActiveItem().retrieveCheckpoint(id);
+    if (!checkpoint) {
+      throw new Error(`Checkpoint ${id} not found`);
+    }
+    agent.restoreCheckpoint(checkpoint);
+  }
 
-	async listCheckpoints() {
-		return await this.checkpointProviders.getActiveItem().listCheckpoints();
-	}
+  async listCheckpoints() {
+    return await this.checkpointProviders.getActiveItem().listCheckpoints();
+  }
 }
