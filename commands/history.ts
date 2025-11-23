@@ -1,10 +1,11 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import type {AgentCheckpointListItem} from "../AgentCheckpointProvider.js";
 import AgentCheckpointService from "../AgentCheckpointService.js";
 
-export const description: string = "/history - Browse agent checkpoints";
+const description: string = "/history - Browse agent checkpoints";
 
-export async function execute(
+async function execute(
   _remainder: string | undefined,
   agent: Agent,
 ): Promise<void> {
@@ -181,3 +182,8 @@ export function help(): string[] {
     "  - With no arguments: Browse agent checkpoints using interactive tree selection grouped by agent ID",
   ];
 }
+export default {
+  description,
+  execute,
+  help,
+} as TokenRingAgentCommand

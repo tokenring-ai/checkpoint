@@ -1,5 +1,6 @@
-import type {AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
+import TokenRingApp from "@tokenring-ai/app";
 import {AgentCommandService, AgentLifecycleService} from "@tokenring-ai/agent";
+import {TokenRingPlugin} from "@tokenring-ai/app";
 import {z} from "zod";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
 import * as chatCommands from "./chatCommands.ts";
@@ -15,20 +16,20 @@ export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
-  install(agentTeam: AgentTeam) {
-    agentTeam.waitForService(AgentCommandService, agentCommandService =>
+  install(app: TokenRingApp) {
+    app.waitForService(AgentCommandService, agentCommandService =>
       agentCommandService.addAgentCommands(chatCommands)
     );
-    agentTeam.waitForService(AgentLifecycleService, lifecycleService =>
+    app.waitForService(AgentLifecycleService, lifecycleService =>
       lifecycleService.addHooks(packageJSON.name, hooks)
     );
-    agentTeam.addServices(new AgentCheckpointService());
+    app.addServices(new AgentCheckpointService());
   },
 
-  start(agentTeam: AgentTeam) {
-    const config = agentTeam.getConfigSlice("checkpoint", CheckpointPackageConfigSchema);
-    agentTeam.requireService(AgentCheckpointService).setActiveProviderName(config.defaultProvider);
+  start(app: TokenRingApp) {
+    const config = app.getConfigSlice("checkpoint", CheckpointPackageConfigSchema);
+    app.requireService(AgentCheckpointService).setActiveProviderName(config.defaultProvider);
   }
-} as TokenRingPackage;
+} as TokenRingPlugin;
 
 export {default as AgentStateStorage} from "../checkpoint/AgentCheckpointService.ts";

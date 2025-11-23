@@ -1,1 +1,1 @@
-export * as autoCheckpoint from "./hooks/autoCheckpoint.ts";
+export {default as autoCheckpoint} from "./hooks/autoCheckpoint.ts";

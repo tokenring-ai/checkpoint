@@ -4,9 +4,10 @@
  * /checkpoint list - shows all checkpoints
  */
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import AgentCheckpointService from "../AgentCheckpointService.ts";
 
-export const description: string =
+const description: string =
   "/checkpoint [create|restore|list] - Create or restore conversation checkpoints to resume chat.";
 
 export async function execute(
@@ -121,3 +122,8 @@ export function help(): string[] {
     "    /checkpoint list             - Show interactive checkpoint browser",
   ];
 }
+export default {
+  description,
+  execute,
+  help,
+} as TokenRingAgentCommand
