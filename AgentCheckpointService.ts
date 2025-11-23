@@ -1,7 +1,7 @@
 import {AgentLifecycleService} from "@tokenring-ai/agent";
 import Agent from "@tokenring-ai/agent/Agent";
 import type {TokenRingService} from "@tokenring-ai/agent/types";
-import KeyedRegistryWithSingleSelection from "@tokenring-ai/utility/KeyedRegistryWithSingleSelection";
+import KeyedRegistryWithSingleSelection from "@tokenring-ai/utility/registry/KeyedRegistryWithSingleSelection";
 import type {AgentCheckpointProvider} from "./AgentCheckpointProvider.js";
 
 export default class AgentCheckpointService implements TokenRingService {
