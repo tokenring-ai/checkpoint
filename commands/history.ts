@@ -176,7 +176,7 @@ async function displayCheckpointDetails(
 }
 
 // noinspection JSUnusedGlobalSymbols
-export function help(): string[] {
+function help(): string[] {
   return [
     "/history",
     "  - With no arguments: Browse agent checkpoints using interactive tree selection grouped by agent ID",

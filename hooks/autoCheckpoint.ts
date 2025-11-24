@@ -1,5 +1,4 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import Hook from "@tokenring-ai/agent/commands/hook";
 import {HookConfig} from "@tokenring-ai/agent/types";
 import AgentCheckpointService from "../AgentCheckpointService.js";
 
