@@ -1,10 +1,8 @@
-# Checkpoint Package
+# @tokenring-ai/checkpoint
 
 ## Overview
 
-The `@tokenring-ai/checkpoint` package provides persistent state management for agents within the Token Ring Agent
-framework. It enables agents to save snapshots of their current state and restore them later, supporting workflow
-interruption, experimentation, and session recovery.
+The `@tokenring-ai/checkpoint` package provides persistent state management for agents within the Token Ring Agent framework. It enables agents to save snapshots of their current state and restore them later, supporting workflow interruption, experimentation, and session recovery.
 
 **Key Features:**
 
@@ -126,18 +124,6 @@ type AgentCheckpointListItem = Omit<StoredAgentCheckpoint, "state">;
 - `agentId` - Agent identifier
 - `createdAt` - Checkpoint creation timestamp
 
-### Checkpoint Storage Interface
-
-Extending the provider pattern for custom implementations:
-
-```typescript
-export interface AgentCheckpointProvider {
-  storeCheckpoint(data: NamedAgentCheckpoint): Promise<string>;
-  retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>;
-  listCheckpoints(): Promise<AgentCheckpointListItem[]>;
-}
-```
-
 ## Commands
 
 ### `/checkpoint`
@@ -221,8 +207,7 @@ For each selected checkpoint:
 
 ### `autoCheckpoint`
 
-Automatically creates a checkpoint after each agent input is processed. Enabled by default when the package is
-installed.
+Automatically creates a checkpoint after each agent input is processed. Enabled by default when the package is installed.
 
 **Hook Point:** `afterAgentInputComplete`
 
@@ -329,9 +314,9 @@ const id = await service.saveAgentCheckpoint('Critical State', agent);
 The checkpoint package is automatically installed when registered with an AgentTeam:
 
 ```typescript
-import { packageInfo } from '@tokenring-ai/checkpoint';
+import checkpointPackage from '@tokenring-ai/checkpoint';
 
-agentTeam.registerPackages([packageInfo]);
+agentTeam.registerPackages([checkpointPackage]);
 ```
 
 **Automatically Provides:**
@@ -364,8 +349,8 @@ The package defines the interface; storage providers are implemented separately:
 1. **Regular Checkpoints**: Use auto-checkpointing for frequent automatic saves
 2. **Named Checkpoints**: Create named checkpoints at logical decision points
 3. **Storage Selection**: Choose appropriate provider for your use case:
- - Memory for testing/experimentation
- - Database for production deployments
+   - Memory for testing/experimentation
+   - Database for production deployments
 4. **Cleanup**: Periodically list and remove old checkpoints to manage storage
 5. **Error Handling**: Always catch restore errors for graceful degradation
 
