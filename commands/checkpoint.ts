@@ -8,7 +8,7 @@ import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import AgentCheckpointService from "../AgentCheckpointService.ts";
 
 const description: string =
-  "/checkpoint [create|restore|list] - Create or restore conversation checkpoints to resume chat.";
+  "/checkpoint - Create or restore conversation checkpoints to resume chat";
 
 export async function execute(
   remainder: string | undefined,
@@ -106,22 +106,42 @@ export async function execute(
   }
 }
 
-// noinspection JSUnusedGlobalSymbols
-function help(): string[] {
-  return [
-    "/checkpoint [action] [args...] - Create or restore conversation checkpoints",
-    "  Actions:",
-    "    create [label]     - Create checkpoint with optional label",
-    "    restore <id>       - Restore specific checkpoint by ID",
-    "    list               - Interactive tree selection of checkpoints",
-    "",
-    "  Examples:",
-    "    /checkpoint create           - Create checkpoint with default label",
-    "    /checkpoint create 'My Fix'  - Create checkpoint with custom label",
-    "    /checkpoint restore abc123   - Restore specific checkpoint",
-    "    /checkpoint list             - Show interactive checkpoint browser",
-  ];
-}
+const help: string = `# /checkpoint - Create or restore conversation checkpoints
+
+## Actions
+
+- **create [label]** - Create checkpoint with optional label
+- **restore <id>** - Restore specific checkpoint by ID
+- **list** - Interactive tree selection of checkpoints
+
+## Features
+
+- Persistent checkpoint storage
+- Interactive tree browser for easy selection
+- Grouped by date for better organization
+- Chronological ordering (newest first)
+- Optional custom labels for better organization
+
+## Examples
+
+/checkpoint create                    - Create checkpoint with default label
+/checkpoint create 'My Fix'           - Create checkpoint with custom label
+/checkpoint restore abc123            - Restore specific checkpoint by ID
+/checkpoint list                      - Show interactive checkpoint browser
+
+## Output
+
+- Confirmation messages for create/restore operations
+- Interactive tree selection for list action
+- Error handling for invalid checkpoint IDs
+- Organized display by date and time
+
+## Tips
+
+- Use descriptive labels to easily identify checkpoints
+- Use the list action to browse and restore checkpoints visually
+- Checkpoints are automatically organized by date`;
+
 export default {
   description,
   execute,

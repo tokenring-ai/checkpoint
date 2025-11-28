@@ -1,2 +1,7 @@
-export {default as checkpoint} from "./commands/checkpoint.ts";
-export {default as history} from "./commands/history.ts";
+import {default as checkpoint} from "./commands/checkpoint.ts";
+import {default as history} from "./commands/history.ts";
+
+export default {
+  checkpoint,
+  history,
+};

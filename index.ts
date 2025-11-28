@@ -3,8 +3,8 @@ import {AgentCommandService, AgentLifecycleService} from "@tokenring-ai/agent";
 import {TokenRingPlugin} from "@tokenring-ai/app";
 import {z} from "zod";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
-import * as chatCommands from "./chatCommands.ts";
-import * as hooks from "./hooks.ts";
+import chatCommands from "./chatCommands.ts";
+import hooks from "./hooks.ts";
 import packageJSON from "./package.json" with {type: "json"};
 
 export const CheckpointPackageConfigSchema = z.object({
