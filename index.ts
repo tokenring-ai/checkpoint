@@ -1,11 +1,14 @@
 import TokenRingApp from "@tokenring-ai/app";
 import {AgentCommandService, AgentLifecycleService} from "@tokenring-ai/agent";
 import {TokenRingPlugin} from "@tokenring-ai/app";
+import {WebHostService} from "@tokenring-ai/web-host";
+import JsonRpcResource from "@tokenring-ai/web-host/JsonRpcResource";
 import {z} from "zod";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
 import chatCommands from "./chatCommands.ts";
 import hooks from "./hooks.ts";
 import packageJSON from "./package.json" with {type: "json"};
+import checkpointRPC from "./rpc/checkpoint.ts";
 
 export const CheckpointPackageConfigSchema = z.object({
   defaultProvider: z.string(),
@@ -24,6 +27,9 @@ export default {
       lifecycleService.addHooks(packageJSON.name, hooks)
     );
     app.addServices(new AgentCheckpointService());
+    app.waitForService(WebHostService, webHostService => {
+      webHostService.registerResource("Checkpoint RPC endpoint", new JsonRpcResource(app, checkpointRPC));
+    });
   },
 
   start(app: TokenRingApp) {

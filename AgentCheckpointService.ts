@@ -38,7 +38,7 @@ export default class AgentCheckpointService implements TokenRingService {
     if (!checkpoint) {
       throw new Error(`Checkpoint ${id} not found`);
     }
-    agent.restoreCheckpoint(checkpoint);
+    agent.restoreState(checkpoint.state);
   }
 
   async listCheckpoints() {
