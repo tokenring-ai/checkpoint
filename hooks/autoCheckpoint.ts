@@ -5,11 +5,16 @@ import AgentCheckpointService from "../AgentCheckpointService.js";
 const name = "autoCheckpoint";
 const description = "Automatically saves agent checkpoints after input is handled";
 
-async function afterAgentInputComplete(agent: Agent, message: string): Promise<void> {
+async function autoCheckpoint(agent: Agent, message: string): Promise<void> {
   const storage = agent.getServiceByType(AgentCheckpointService);
   if (storage) {
     await storage.saveAgentCheckpoint(message, agent);
   }
 }
 
-export default {name, description, afterAgentInputComplete} as HookConfig;
+export default {
+  name,
+  description,
+  afterAgentInputComplete: autoCheckpoint,
+  beforeAgentInput: autoCheckpoint,
+} satisfies HookConfig;
