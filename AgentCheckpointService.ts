@@ -22,6 +22,9 @@ export default class AgentCheckpointService implements TokenRingService {
   getAvailableProviders =
     this.checkpointProviders.getAllItemNames;
 
+  async start(): Promise<void> {
+    await Promise.all(this.checkpointProviders.getAllItemValues().map(provider => provider.start?.()))
+  }
   async attach(agent: Agent): Promise<void> {
     agent.requireServiceByType(AgentLifecycleService).enableHooks(["@tokenring-ai/checkpoint/autoCheckpoint"], agent);
   }
