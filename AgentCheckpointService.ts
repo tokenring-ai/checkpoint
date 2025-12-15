@@ -22,7 +22,7 @@ export default class AgentCheckpointService implements TokenRingService {
   getAvailableProviders =
     this.checkpointProviders.getAllItemNames;
 
-  async start(): Promise<void> {
+  async run(): Promise<void> {
     await Promise.all(this.checkpointProviders.getAllItemValues().map(provider => provider.start?.()))
   }
   async attach(agent: Agent): Promise<void> {
