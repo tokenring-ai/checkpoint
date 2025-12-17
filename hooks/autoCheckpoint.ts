@@ -16,5 +16,5 @@ export default {
   name,
   description,
   afterAgentInputComplete: autoCheckpoint,
-  beforeAgentInput: autoCheckpoint,
+  beforeChatCompletion: autoCheckpoint,
 } satisfies HookConfig;
