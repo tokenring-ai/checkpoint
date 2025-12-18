@@ -32,4 +32,4 @@ export default {
     const config = app.getConfigSlice("checkpoint", CheckpointPluginConfigSchema);
     app.requireService(AgentCheckpointService).setActiveProviderName(config.defaultProvider);
   }
-} as TokenRingPlugin;
+} satisfies TokenRingPlugin;
