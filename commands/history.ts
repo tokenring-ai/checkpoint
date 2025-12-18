@@ -52,6 +52,7 @@ async function execute(
   // Show interactive tree selection
   const selectedCheckpointId = await agent.askHuman({
     type: "askForSingleTreeSelection",
+    title: "Select Checkpoint",
     message: "Select checkpoint to view:",
     tree: buildHistoryTree(),
   });

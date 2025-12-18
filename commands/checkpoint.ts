@@ -83,6 +83,7 @@ export async function execute(
       try {
         const selectedId = await agent.askHuman({
           type: "askForSingleTreeSelection",
+          title: "Select Checkpoint",
           message: "Select a checkpoint to restore:",
           tree,
         });
