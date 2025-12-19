@@ -12,6 +12,8 @@ The `@tokenring-ai/checkpoint` package provides persistent state management for 
 - **Auto-Checkpointing**: Automatic checkpoint creation after agent input processing
 - **Session History**: Browse checkpoints grouped by agent session
 - **Named Checkpoints**: Label checkpoints for easy identification
+- **RPC API**: JSON-RPC endpoints for remote checkpoint operations
+- **Plugin Architecture**: Automatic integration with TokenRing applications
 
 ## Installation
 
@@ -86,6 +88,9 @@ Interface for implementing custom checkpoint storage backends.
 
 ```typescript
 interface AgentCheckpointProvider {
+  // Optional startup method
+  start?(): Promise<void>;
+  
   // Save checkpoint and return its ID
   storeCheckpoint(data: NamedAgentCheckpoint): Promise<string>;
   
@@ -111,7 +116,7 @@ interface StoredAgentCheckpoint extends NamedAgentCheckpoint {
 }
 
 // Checkpoint listing item (minimal info)
-type AgentCheckpointListItem = Omit<StoredAgentCheckpoint, "state">;
+type AgentCheckpointListItem = Omit<StoredAgentCheckpoint, "state" | "config">;
 ```
 
 **Checkpoint State Contains:**
@@ -209,7 +214,9 @@ For each selected checkpoint:
 
 Automatically creates a checkpoint after each agent input is processed. Enabled by default when the package is installed.
 
-**Hook Point:** `afterAgentInputComplete`
+**Hook Points:** 
+- `afterAgentInputComplete`
+- `beforeChatCompletion`
 
 **Behavior:**
 
@@ -226,6 +233,96 @@ agent.hooks.disableItems("@tokenring-ai/checkpoint/autoCheckpoint");
 
 // Re-enable auto-checkpointing
 agent.hooks.enableItems("@tokenring-ai/checkpoint/autoCheckpoint");
+```
+
+## RPC API
+
+The package provides JSON-RPC endpoints for remote checkpoint operations.
+
+**Endpoint:** `/rpc/checkpoint`
+
+### `listCheckpoints`
+
+Query all available checkpoints without state data.
+
+**Request:**
+```json
+{
+  "method": "listCheckpoints",
+  "params": {}
+}
+```
+
+**Response:**
+```json
+{
+  "result": [
+    {
+      "id": "checkpoint-123",
+      "name": "Before Feature Implementation",
+      "agentId": "agent-456",
+      "createdAt": 1640995200000
+    }
+  ]
+}
+```
+
+### `getCheckpoint`
+
+Retrieve a specific checkpoint with full state data.
+
+**Request:**
+```json
+{
+  "method": "getCheckpoint",
+  "params": {
+    "id": "checkpoint-123"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "result": {
+    "id": "checkpoint-123",
+    "name": "Before Feature Implementation",
+    "agentId": "agent-456",
+    "createdAt": 1640995200000,
+    "state": {
+      "agentState": {...},
+      "chatMessages": [...],
+      "toolsEnabled": [...],
+      "hooksEnabled": [...]
+    }
+  }
+}
+```
+
+### `launchAgentFromCheckpoint`
+
+Create a new agent from a checkpoint.
+
+**Request:**
+```json
+{
+  "method": "launchAgentFromCheckpoint",
+  "params": {
+    "checkpointId": "checkpoint-123",
+    "headless": false
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "result": {
+    "agentId": "agent-789",
+    "agentName": "Restored Agent",
+    "agentType": "default"
+  }
+}
 ```
 
 ## Usage Examples
@@ -307,6 +404,22 @@ agent.hooks.enableItems("@tokenring-ai/checkpoint/autoCheckpoint");
 const id = await service.saveAgentCheckpoint('Critical State', agent);
 ```
 
+### RPC Usage
+
+```typescript
+// Using the RPC endpoint directly
+const response = await fetch('/rpc/checkpoint', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    method: 'listCheckpoints',
+    params: {}
+  })
+});
+
+const checkpoints = await response.json();
+```
+
 ## Package Integration
 
 ### Installation with AgentTeam
@@ -324,6 +437,7 @@ agentTeam.registerPackages([checkpointPackage]);
 - Chat commands (`/checkpoint`, `/history`)
 - Auto-checkpoint hook
 - `AgentCheckpointService` service instance
+- RPC endpoints for remote operations
 - Configuration schema validation
 
 ### Configuration Schema
@@ -353,6 +467,7 @@ The package defines the interface; storage providers are implemented separately:
    - Database for production deployments
 4. **Cleanup**: Periodically list and remove old checkpoints to manage storage
 5. **Error Handling**: Always catch restore errors for graceful degradation
+6. **RPC Usage**: Use RPC endpoints for remote checkpoint management and agent spawning
 
 ## Error Handling
 
@@ -372,6 +487,40 @@ try {
 bun test                  # Run tests
 bun run test:watch        # Watch mode
 bun run test:coverage     # Coverage report
+```
+
+## Plugin Architecture
+
+The package uses a plugin architecture for automatic integration:
+
+```typescript
+import TokenRingApp from "@tokenring-ai/app";
+import {AgentCommandService, AgentLifecycleService} from "@tokenring-ai/agent";
+import AgentCheckpointService from "./AgentCheckpointService.ts";
+import chatCommands from "./chatCommands.ts";
+import hooks from "./hooks.ts";
+
+export default {
+  install(app: TokenRingApp) {
+    // Register chat commands
+    app.waitForService(AgentCommandService, service =>
+      service.addAgentCommands(chatCommands)
+    );
+    
+    // Register hooks
+    app.waitForService(AgentLifecycleService, service =>
+      service.addHooks(packageJSON.name, hooks)
+    );
+    
+    // Register service
+    app.addServices(new AgentCheckpointService());
+  },
+  
+  start(app: TokenRingApp) {
+    const config = app.getConfigSlice("checkpoint", CheckpointPluginConfigSchema);
+    app.requireService(AgentCheckpointService).setActiveProviderName(config.defaultProvider);
+  }
+}
 ```
 
 ## License
