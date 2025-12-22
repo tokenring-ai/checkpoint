@@ -6,7 +6,7 @@ import AgentCheckpointService from "../AgentCheckpointService.js";
 const description: string = "/history - Browse and view agent checkpoint history";
 
 async function execute(
-  _remainder: string | undefined,
+  _remainder: string,
   agent: Agent,
 ): Promise<void> {
   const checkpointStorage = agent.requireServiceByType(AgentCheckpointService);
