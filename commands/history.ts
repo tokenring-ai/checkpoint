@@ -100,27 +100,6 @@ function groupCheckpointsByAgent(
   return grouped;
 }
 
-// Format date for display
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  if (dateString === today.toISOString().split("T")[0]) {
-    return "Today";
-  } else if (dateString === yesterday.toISOString().split("T")[0]) {
-    return "Yesterday";
-  } else {
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  }
-}
-
 // Format time for display
 function formatTime(timestamp: number): string {
   const date = new Date(timestamp);

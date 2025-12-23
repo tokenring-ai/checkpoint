@@ -82,7 +82,7 @@ async function list(remainder: string, agent: Agent) {
       return;
     }
 
-    const row = await checkpointService.restoreAgentCheckpoint(
+    await checkpointService.restoreAgentCheckpoint(
       selectedId,
       agent,
     );
