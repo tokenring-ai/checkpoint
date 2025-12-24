@@ -200,6 +200,7 @@ Shows an interactive tree selection where checkpoints are grouped by:
 2. Individual checkpoints within each agent (sorted by creation time, newest first)
 
 **Display Information:**
+
 For each selected checkpoint:
 
 - Name and creation timestamp
@@ -484,7 +485,7 @@ try {
 ## Testing
 
 ```bash
-bun test                  # Run tests
+vitest run                  # Run tests
 bun run test:watch        # Watch mode
 bun run test:coverage     # Coverage report
 ```
@@ -499,28 +500,32 @@ import {AgentCommandService, AgentLifecycleService} from "@tokenring-ai/agent";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
 import chatCommands from "./chatCommands.ts";
 import hooks from "./hooks.ts";
+import {CheckpointPluginConfigSchema} from "./index.ts";
+import packageJSON from "./package.json" with {type: "json"};
+import checkpointRPC from "./rpc/checkpoint.ts";
 
 export default {
+  name: packageJSON.name,
+  version: packageJSON.version,
+  description: packageJSON.description,
   install(app: TokenRingApp) {
-    // Register chat commands
-    app.waitForService(AgentCommandService, service =>
-      service.addAgentCommands(chatCommands)
+    app.waitForService(AgentCommandService, agentCommandService =>
+      agentCommandService.addAgentCommands(chatCommands)
     );
-    
-    // Register hooks
-    app.waitForService(AgentLifecycleService, service =>
-      service.addHooks(packageJSON.name, hooks)
+    app.waitForService(AgentLifecycleService, lifecycleService =>
+      lifecycleService.addHooks(packageJSON.name, hooks)
     );
-    
-    // Register service
     app.addServices(new AgentCheckpointService());
+    app.waitForService(WebHostService, webHostService => {
+      webHostService.registerResource("Checkpoint RPC endpoint", new JsonRpcResource(app, checkpointRPC));
+    });
   },
-  
+
   start(app: TokenRingApp) {
     const config = app.getConfigSlice("checkpoint", CheckpointPluginConfigSchema);
     app.requireService(AgentCheckpointService).setActiveProviderName(config.defaultProvider);
   }
-}
+} satisfies TokenRingPlugin;
 ```
 
 ## License
