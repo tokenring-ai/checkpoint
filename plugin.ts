@@ -33,7 +33,6 @@ export default {
   },
 
   start(app, config) {
-    // const config = app.getConfigSlice("checkpoint", CheckpointPluginConfigSchema);
     app.requireService(AgentCheckpointService).setActiveProviderName(config.checkpoint.defaultProvider);
   },
   config: packageConfigSchema
