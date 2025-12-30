@@ -1,50 +1,44 @@
 import {AgentLifecycleService} from "@tokenring-ai/agent";
 import Agent from "@tokenring-ai/agent/Agent";
-
 import {TokenRingService} from "@tokenring-ai/app/types";
-import KeyedRegistryWithSingleSelection from "@tokenring-ai/utility/registry/KeyedRegistryWithSingleSelection";
+import {z} from "zod";
 import type {AgentCheckpointProvider} from "./AgentCheckpointProvider.js";
+import {CheckpointConfigSchema} from "./schema.ts";
 
 export default class AgentCheckpointService implements TokenRingService {
   name = "AgentCheckpointService";
   description = "Persists agent state to a storage provider";
 
-  private checkpointProviders =
-    new KeyedRegistryWithSingleSelection<AgentCheckpointProvider>();
-
-  registerProvider = this.checkpointProviders.register;
-  getActiveProviderName =
-    this.checkpointProviders.getActiveItemName;
-  getActiveProvider =
-    this.checkpointProviders.getActiveItem;
-  setActiveProviderName =
-    this.checkpointProviders.setEnabledItem;
-  getAvailableProviders =
-    this.checkpointProviders.getAllItemNames;
+  checkpointProvider!: AgentCheckpointProvider;
+  constructor(readonly options: z.output<typeof CheckpointConfigSchema>) {}
 
   async run(): Promise<void> {
-    await Promise.all(this.checkpointProviders.getAllItemValues().map(provider => provider.start?.()))
+    if (!this.checkpointProvider) throw new Error(`CheckpointProvider of type ${this.options.provider.type} not found`);
   }
+
   async attach(agent: Agent): Promise<void> {
     agent.requireServiceByType(AgentLifecycleService).enableHooks(["@tokenring-ai/checkpoint/autoCheckpoint"], agent);
   }
 
+  setCheckpointProvider(provider: AgentCheckpointProvider) {
+    this.checkpointProvider = provider;
+  }
   async saveAgentCheckpoint(name: string, agent: Agent): Promise<string> {
-    return await this.checkpointProviders.getActiveItem().storeCheckpoint({
+    return await this.checkpointProvider.storeCheckpoint({
       name,
       ...agent.generateCheckpoint(),
     });
   }
 
   async restoreAgentCheckpoint(id: string, agent: Agent): Promise<void> {
-    const checkpoint = await this.checkpointProviders.getActiveItem().retrieveCheckpoint(id);
+    const checkpoint = await this.checkpointProvider.retrieveCheckpoint(id);
     if (!checkpoint) {
       throw new Error(`Checkpoint ${id} not found`);
     }
     agent.restoreState(checkpoint.state);
   }
 
-  async listCheckpoints() {
-    return await this.checkpointProviders.getActiveItem().listCheckpoints();
+  async listCheckpoints(agent: Agent) {
+    return await this.checkpointProvider.listCheckpoints();
   }
 }

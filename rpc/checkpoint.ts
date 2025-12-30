@@ -7,19 +7,19 @@ import CheckpointRpcSchema from "./schema.ts";
 export default createJsonRPCEndpoint(CheckpointRpcSchema, {
   async listCheckpoints(_args, app: TokenRingApp) {
     const checkpointService = app.requireService(AgentCheckpointService);
-    return await checkpointService.listCheckpoints();
+    return await checkpointService.checkpointProvider.listCheckpoints();
   },
 
   async getCheckpoint(args, app: TokenRingApp) {
     const checkpointService = app.requireService(AgentCheckpointService);
-    return await checkpointService.getActiveProvider().retrieveCheckpoint(args.id);
+    return await checkpointService.checkpointProvider.retrieveCheckpoint(args.id);
   },
 
   async launchAgentFromCheckpoint(args, app: TokenRingApp) {
     const checkpointService = app.requireService(AgentCheckpointService);
     const agentManager = app.requireService(AgentManager);
 
-    const checkpoint = await checkpointService.getActiveProvider().retrieveCheckpoint(args.checkpointId);
+    const checkpoint = await checkpointService.checkpointProvider.retrieveCheckpoint(args.checkpointId);
     if (!checkpoint) {
       throw new Error(`Checkpoint ${args.checkpointId} not found`);
     }

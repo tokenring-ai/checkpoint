@@ -1,10 +1,9 @@
 import {z} from "zod";
 
-export const CheckpointPluginConfigSchema = z.object({
-  defaultProvider: z.string(),
-  providers: z.record(z.string(), z.any())
+export const CheckpointConfigSchema = z.object({
+  provider: z.looseObject({
+   type: "string"
+  })
 });
-
-
 
 export {default as AgentStateStorage} from "../checkpoint/AgentCheckpointService.ts";

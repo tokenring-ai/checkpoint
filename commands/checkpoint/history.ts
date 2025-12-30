@@ -1,7 +1,7 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
-import type {AgentCheckpointListItem} from "../AgentCheckpointProvider.js";
-import AgentCheckpointService from "../AgentCheckpointService.js";
+import type {AgentCheckpointListItem} from "../../AgentCheckpointProvider.js";
+import AgentCheckpointService from "../../AgentCheckpointService.js";
 
 const description: string = "/history - Browse and view agent checkpoint history";
 
@@ -12,7 +12,7 @@ async function execute(
   const checkpointStorage = agent.requireServiceByType(AgentCheckpointService);
 
   // Get all agent checkpoints
-  const checkpoints = await checkpointStorage.listCheckpoints();
+  const checkpoints = await checkpointStorage.listCheckpoints(agent);
 
   if (!checkpoints || checkpoints.length === 0) {
     agent.infoLine("No checkpoint history found.");
@@ -125,7 +125,7 @@ async function displayCheckpointDetails(
 
   try {
     // Retrieve the full checkpoint with state data (but don't restore it to the current agent)
-    const fullCheckpoint = await checkpointStorage.getActiveProvider().retrieveCheckpoint(
+    const fullCheckpoint = await checkpointStorage.checkpointProvider.retrieveCheckpoint(
       checkpointItem.id,
     );
 
@@ -177,8 +177,9 @@ With no arguments: Browse all checkpoints using interactive tree selection group
 - Detailed checkpoint information including state
 - Error handling for corrupted checkpoints`;
 
-export default {
-  description,
-  execute,
-  help,
-} satisfies TokenRingAgentCommand
+export async function history(
+  _remainder: string,
+  agent: Agent,
+): Promise<void> {
+  await execute(_remainder, agent);
+}
