@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {Agent, AgentCommandService, AgentLifecycleService} from '@tokenring-ai/agent';
 import AgentCheckpointService from './AgentCheckpointService.js';
 import checkpointCommand from './commands/checkpoint.js';
-import historyCommand from './commands/history.js';
+import { history } from './commands/checkpoint/history.js';
 import autoCheckpointHook from './hooks/autoCheckpoint.js';
 import checkpointRPC from './rpc/checkpoint.js';
 import type { AgentCheckpointProvider } from './AgentCheckpointProvider.js';
@@ -20,7 +20,7 @@ class WebHostService {
 }
 
 // Mock provider with realistic implementation
-const createMockProvider = (): AgentCheckpointProvider => {
+function createMockProvider() : AgentCheckpointProvider {
   const checkpoints = new Map<string, any>();
 
   return {
@@ -49,8 +49,8 @@ const createMockProvider = (): AgentCheckpointProvider => {
         createdAt: cp.createdAt
       }));
     }
-  };
-};
+  } satisfies AgentCheckpointProvider;
+}
 
 
 describe('Checkpoint Integration', () => {
@@ -65,11 +65,10 @@ describe('Checkpoint Integration', () => {
 
     app = createTestingApp();
     checkpointService  = new AgentCheckpointService();
+    checkpointService.setCheckpointProvider(createMockProvider());
     lifecycleService = new AgentLifecycleService();
     agentCommandService = new AgentCommandService();
-    checkpointService.registerProvider('mock-provider', createMockProvider());
 
-    checkpointService.setActiveProviderName('mock-provider');
     lifecycleService.registerHook('@tokenring-ai/checkpoint/autoCheckpoint', autoCheckpointHook);
 
     app.addServices(checkpointService,agentCommandService, lifecycleService, new WebHostService());
@@ -101,8 +100,14 @@ describe('Checkpoint Integration', () => {
       expect(agent.restoreState).toHaveBeenCalledWith({
         "AgentEventState": {
           "busyWith": null,
-          "events": [],
+          "events": [
+            {
+              "timestamp": expect.any(Number),
+              "type": "agent.created",
+            },
+          ],
           "idle": true,
+          "statusLine": null,
         },
         "CommandHistoryState": {
           "commands": [],
@@ -112,7 +117,10 @@ describe('Checkpoint Integration', () => {
           "enabledHooks": [
            "@tokenring-ai/checkpoint/autoCheckpoint",
           ],
-        }
+        },
+        "TodoState": {
+          "todos": [],
+        },
       });
     });
 
@@ -159,7 +167,7 @@ describe('Checkpoint Integration', () => {
       await checkpointService.saveAgentCheckpoint('History Test 1', agent);
       await checkpointService.saveAgentCheckpoint('History Test 2', agent);
       
-      await historyCommand.execute('list', agent);
+      await history('list', agent);
       
       expect(agent.askHuman).toHaveBeenCalled();
     });
@@ -203,44 +211,16 @@ describe('Checkpoint Integration', () => {
 
   describe('Provider Integration', () => {
     it('should work with mock provider', async () => {
-      checkpointService.registerProvider('mock-provider', createMockProvider());
-      checkpointService.setActiveProviderName('mock-provider');
-      
       // Test provider operations
       const id = await checkpointService.saveAgentCheckpoint('Provider Test', agent);
       expect(id).toBeDefined();
       
-      const checkpoint = await checkpointService.getActiveProvider().retrieveCheckpoint(id);
+      const checkpoint = await checkpointService.checkpointProvider.retrieveCheckpoint(id);
       expect(checkpoint).not.toBeNull();
       expect(checkpoint.name).toBe('Provider Test');
       
       const list = await checkpointService.listCheckpoints();
       expect(list).toHaveLength(1);
-    });
-
-    it('should handle provider switching', async () => {
-      const provider2 = createMockProvider();
-      
-      checkpointService.registerProvider('provider-1', createMockProvider());
-      checkpointService.registerProvider('provider-2', provider2);
-      
-      checkpointService.setActiveProviderName('provider-1');
-      const id1 = await checkpointService.saveAgentCheckpoint('Provider 1 Test', agent);
-      
-      checkpointService.setActiveProviderName('provider-2');
-      const id2 = await checkpointService.saveAgentCheckpoint('Provider 2 Test', agent);
-      
-      // Switch back to provider 1
-      checkpointService.setActiveProviderName('provider-1');
-      const list1 = await checkpointService.listCheckpoints();
-      expect(list1).toHaveLength(1);
-      expect(list1[0].name).toBe('Provider 1 Test');
-      
-      // Switch to provider 2
-      checkpointService.setActiveProviderName('provider-2');
-      const list2 = await checkpointService.listCheckpoints();
-      expect(list2).toHaveLength(1);
-      expect(list2[0].name).toBe('Provider 2 Test');
     });
   });
 
@@ -254,9 +234,8 @@ describe('Checkpoint Integration', () => {
         retrieveCheckpoint: vi.fn().mockRejectedValue(new Error('Retrieve failed')),
         listCheckpoints: vi.fn().mockRejectedValue(new Error('List failed'))
       };
-      
-      checkpointService.registerProvider('failing-provider', failingProvider);
-      checkpointService.setActiveProviderName('failing-provider');
+
+      checkpointService.setCheckpointProvider(failingProvider);
       
       await expect(checkpointService.run()).rejects.toThrow('Provider failed to start');
     });

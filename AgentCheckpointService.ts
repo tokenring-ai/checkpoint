@@ -14,6 +14,7 @@ export default class AgentCheckpointService implements TokenRingService {
 
   async run(): Promise<void> {
     if (!this.checkpointProvider) throw new Error(`CheckpointProvider of type ${this.options.provider.type} not found`);
+    await this.checkpointProvider.start?.();
   }
 
   async attach(agent: Agent): Promise<void> {
