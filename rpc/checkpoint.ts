@@ -29,7 +29,7 @@ export default createJsonRPCEndpoint(CheckpointRpcSchema, {
     return {
       agentId: agent.id,
       agentName: agent.name,
-      agentType: agent.config.type,
+      agentType: agent.config.agentType,
     };
   }
 });

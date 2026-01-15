@@ -36,7 +36,7 @@ export default {
       result: z.object({
         agentId: z.string(),
         agentName: z.string(),
-        agentType: z.string(),
+        agentType: z.string().optional(),
       })
     }
   }
