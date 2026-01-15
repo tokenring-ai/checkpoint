@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import indent from "@tokenring-ai/utility/string/indent";
 import type {AgentCheckpointListItem} from "../../AgentCheckpointProvider.js";
 import AgentCheckpointService from "../../AgentCheckpointService.js";
 
@@ -15,7 +15,7 @@ async function execute(
   const checkpoints = await checkpointStorage.listCheckpoints(agent);
 
   if (!checkpoints || checkpoints.length === 0) {
-    agent.infoLine("No checkpoint history found.");
+    agent.infoMessage("No checkpoint history found.");
     return;
   }
 
@@ -62,7 +62,7 @@ async function execute(
       ({id}) => id === selectedCheckpointId,
     );
     if (!selectedCheckpoint) {
-      agent.errorLine(
+      agent.errorMessage(
         `Checkpoint ${selectedCheckpointId} could not be retrieved.`,
       );
       return;
@@ -74,7 +74,7 @@ async function execute(
       agent,
     );
   } else {
-    agent.infoLine("Checkpoint browsing cancelled.");
+    agent.infoMessage("Checkpoint browsing cancelled.");
   }
 }
 
@@ -116,12 +116,12 @@ async function displayCheckpointDetails(
   checkpointStorage: AgentCheckpointService,
   agent: Agent,
 ): Promise<void> {
-  agent.infoLine(`\n=== Checkpoint: ${checkpointItem.name} ===`);
-  agent.infoLine(`ID: ${checkpointItem.id}`);
-  agent.infoLine(`Agent ID: ${checkpointItem.agentId}`);
-  agent.infoLine(
-    `Created: ${new Date(checkpointItem.createdAt).toLocaleString()}`,
-  );
+  const lines: string[] = [
+    `\n=== Checkpoint: ${checkpointItem.name} ===`,
+    `ID: ${checkpointItem.id}`,
+    `Agent ID: ${checkpointItem.agentId}`,
+    `Created: ${new Date(checkpointItem.createdAt).toLocaleString()}`
+  ];
 
   try {
     // Retrieve the full checkpoint with state data (but don't restore it to the current agent)
@@ -130,29 +130,31 @@ async function displayCheckpointDetails(
     );
 
     if (fullCheckpoint) {
-      agent.infoLine(`\n📋 Checkpoint State:`);
+      lines.push(`\n📋 Checkpoint State:`);
       for (const [name, stateData] of Object.entries(fullCheckpoint.state.agentState)) {
-        agent.infoLine(`\n${name}:`);
-        agent.infoLine(`  ${JSON.stringify(stateData, null, 2).split('\n').join('\n  ')}`);
+        lines.push(`\n${name}:`);
+        lines.push(indent(JSON.stringify(stateData, null, 2), 1));
       }
     }
 
-    agent.infoLine(`\n--- End of Checkpoint Details ---\n`);
+    lines.push(`\n--- End of Checkpoint Details ---\n`);
   } catch (error) {
-    agent.errorLine(
+    agent.errorMessage(
       `Error loading checkpoint ${checkpointItem.id}:`,
       error as Error,
     );
 
     // Show basic info even if retrieval fails
-    agent.infoLine(`\n📋 Checkpoint Information:`);
-    agent.infoLine(`- Name: ${checkpointItem.name}`);
-    agent.infoLine(`- Agent ID: ${checkpointItem.agentId}`);
-    agent.infoLine(
+    lines.push(`\n📋 Checkpoint Information:`);
+    lines.push(`- Name: ${checkpointItem.name}`);
+    lines.push(`- Agent ID: ${checkpointItem.agentId}`);
+    lines.push(
       `- Created: ${new Date(checkpointItem.createdAt).toLocaleString()}`,
     );
-    agent.infoLine(`\n--- End of Checkpoint Details ---\n`);
+    lines.push(`\n--- End of Checkpoint Details ---\n`);
   }
+
+  agent.infoMessage(lines.join("\n"));
 }
 
 const help: string = `# /history - Browse and view agent checkpoint history

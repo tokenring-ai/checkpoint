@@ -12,8 +12,8 @@ const mockAgent = {
   restoreState: vi.fn(),
   requireServiceByType: vi.fn(),
   getServiceByType: vi.fn(),
-  infoLine: vi.fn(),
-  errorLine: vi.fn(),
+  infoMessage: vi.fn(),
+  errorMessage: vi.fn(),
   askHuman: vi.fn(),
   id: 'test-agent-id',
   name: 'test-agent',
@@ -73,14 +73,14 @@ describe('Checkpoint Command', () => {
         await checkpointCommand.execute('create', mockAgent);
         
         expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith('New Checkpoint', mockAgent);
-        expect(mockAgent.infoLine).toHaveBeenCalledWith('Checkpoint created: checkpoint-id-123: New Checkpoint');
+        expect(mockAgent.infoMessage).toHaveBeenCalledWith('Checkpoint created: checkpoint-id-123: New Checkpoint');
       });
 
       it('should create checkpoint with custom label', async () => {
         await checkpointCommand.execute('create My Custom Label', mockAgent);
         
         expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith('My Custom Label', mockAgent);
-        expect(mockAgent.infoLine).toHaveBeenCalledWith('Checkpoint created: checkpoint-id-123: My Custom Label');
+        expect(mockAgent.infoMessage).toHaveBeenCalledWith('Checkpoint created: checkpoint-id-123: My Custom Label');
       });
 
       it('should create checkpoint with complex label', async () => {
@@ -101,13 +101,13 @@ describe('Checkpoint Command', () => {
         await checkpointCommand.execute('restore checkpoint-1', mockAgent);
         
         expect(mockCheckpointService.restoreAgentCheckpoint).toHaveBeenCalledWith('checkpoint-1', mockAgent);
-        expect(mockAgent.infoLine).toHaveBeenCalledWith('Checkpoint checkpoint-1 loaded');
+        expect(mockAgent.infoMessage).toHaveBeenCalledWith('Checkpoint checkpoint-1 loaded');
       });
 
       it('should show error when no ID provided', async () => {
         await checkpointCommand.execute('restore', mockAgent);
         
-        expect(mockAgent.errorLine).toHaveBeenCalledWith('Usage: /checkpoint restore <id> (see /checkpoint list for ids)');
+        expect(mockAgent.errorMessage).toHaveBeenCalledWith('Usage: /checkpoint restore <id> (see /checkpoint list for ids)');
         expect(mockCheckpointService.restoreAgentCheckpoint).not.toHaveBeenCalled();
       });
 
@@ -135,7 +135,7 @@ describe('Checkpoint Command', () => {
         
         await checkpointCommand.execute('list', mockAgent);
         
-        expect(mockAgent.infoLine).toHaveBeenCalledWith('No checkpoints saved. Use /checkpoint create to make one.');
+        expect(mockAgent.infoMessage).toHaveBeenCalledWith('No checkpoints saved. Use /checkpoint create to make one.');
       });
 
       it('should show interactive tree selection', async () => {
@@ -158,7 +158,7 @@ describe('Checkpoint Command', () => {
         await checkpointCommand.execute('list', mockAgent);
         
         expect(mockCheckpointService.restoreAgentCheckpoint).toHaveBeenCalledWith('checkpoint-1', mockAgent);
-        expect(mockAgent.infoLine).toHaveBeenCalledWith('Checkpoint checkpoint-1 loaded');
+        expect(mockAgent.infoMessage).toHaveBeenCalledWith('Checkpoint checkpoint-1 loaded');
       });
 
       it('should handle cancellation of tree selection', async () => {
@@ -166,7 +166,7 @@ describe('Checkpoint Command', () => {
         
         await checkpointCommand.execute('list', mockAgent);
         
-        expect(mockAgent.infoLine).toHaveBeenCalledWith('Checkpoint selection cancelled. No changes made.');
+        expect(mockAgent.infoMessage).toHaveBeenCalledWith('Checkpoint selection cancelled. No changes made.');
         expect(mockCheckpointService.restoreAgentCheckpoint).not.toHaveBeenCalled();
       });
 
@@ -176,7 +176,7 @@ describe('Checkpoint Command', () => {
         
         await checkpointCommand.execute('list', mockAgent);
         
-        expect(mockAgent.errorLine).toHaveBeenCalledWith('Error during checkpoint selection: Error: Tree selection failed');
+        expect(mockAgent.errorMessage).toHaveBeenCalledWith('Error during checkpoint selection: Error: Tree selection failed');
       });
     });
   });

@@ -5,7 +5,7 @@ export async function list(remainder: string, agent: Agent) {
   const checkpointService = agent.requireServiceByType(AgentCheckpointService)
   const savedCheckpoints = await checkpointService.listCheckpoints(agent);
   if (savedCheckpoints.length === 0) {
-    agent.infoLine(
+    agent.infoMessage(
       "No checkpoints saved. Use /checkpoint create to make one.",
     );
     return;
@@ -47,7 +47,7 @@ export async function list(remainder: string, agent: Agent) {
     });
 
     if (!selectedId) {
-      agent.infoLine("Checkpoint selection cancelled. No changes made.");
+      agent.infoMessage("Checkpoint selection cancelled. No changes made.");
       return;
     }
 
@@ -56,8 +56,8 @@ export async function list(remainder: string, agent: Agent) {
       agent,
     );
 
-    agent.infoLine(`Checkpoint ${selectedId} loaded`);
+    agent.infoMessage(`Checkpoint ${selectedId} loaded`);
   } catch (error) {
-    agent.errorLine(`Error during checkpoint selection: ${error}`);
+    agent.errorMessage(`Error during checkpoint selection: ${error}`);
   }
 }
