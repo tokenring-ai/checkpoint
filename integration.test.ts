@@ -1,14 +1,14 @@
+import {Agent, AgentCommandService, AgentLifecycleService} from '@tokenring-ai/agent';
 import createTestingAgent from "@tokenring-ai/agent/test/createTestingAgent";
 import TokenRingApp from "@tokenring-ai/app";
 import createTestingApp from "@tokenring-ai/app/test/createTestingApp";
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {Agent, AgentCommandService, AgentLifecycleService} from '@tokenring-ai/agent';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+import type {AgentCheckpointProvider} from './AgentCheckpointProvider.js';
 import AgentCheckpointService from './AgentCheckpointService.js';
 import checkpointCommand from './commands/checkpoint.js';
-import { history } from './commands/checkpoint/history.js';
+import {history} from './commands/checkpoint/history.js';
 import autoCheckpointHook from './hooks/autoCheckpoint.js';
 import checkpointRPC from './rpc/checkpoint.js';
-import type { AgentCheckpointProvider } from './AgentCheckpointProvider.js';
 
 vi.mock('@tokenring-ai/web-host');
 vi.mock('@tokenring-ai/web-host/JsonRpcResource');
@@ -152,24 +152,24 @@ describe('Checkpoint Integration', () => {
     });
 
     it('should execute checkpoint list command', async () => {
-      vi.spyOn(agent, 'askHuman').mockResolvedValue('test-checkpoint-id');
+      vi.spyOn(agent, 'askQuestion').mockResolvedValue('test-checkpoint-id');
       // Create a checkpoint first
       await checkpointService.saveAgentCheckpoint('List Test', agent);
 
       await checkpointCommand.execute('list', agent);
       
-      expect(agent.askHuman).toHaveBeenCalled();
+      expect(agent.askQuestion).toHaveBeenCalled();
     });
 
     it('should execute history command', async () => {
-      vi.spyOn(agent, 'askHuman').mockResolvedValue('test-checkpoint-id');
+      vi.spyOn(agent, 'askQuestion').mockResolvedValue('test-checkpoint-id');
       // Create checkpoints
       await checkpointService.saveAgentCheckpoint('History Test 1', agent);
       await checkpointService.saveAgentCheckpoint('History Test 2', agent);
       
       await history('list', agent);
       
-      expect(agent.askHuman).toHaveBeenCalled();
+      expect(agent.askQuestion).toHaveBeenCalled();
     });
   });
 

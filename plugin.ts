@@ -7,9 +7,9 @@ import {z} from "zod";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
 import chatCommands from "./chatCommands.ts";
 import hooks from "./hooks.ts";
-import {CheckpointConfigSchema} from "./schema.ts";
 import packageJSON from "./package.json" with {type: "json"};
 import checkpointRPC from "./rpc/checkpoint.ts";
+import {CheckpointConfigSchema} from "./schema.ts";
 
 const packageConfigSchema = z.object({
   checkpoint: CheckpointConfigSchema

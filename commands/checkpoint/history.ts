@@ -1,4 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import indent from "@tokenring-ai/utility/string/indent";
 import type {AgentCheckpointListItem} from "../../AgentCheckpointProvider.js";
 import AgentCheckpointService from "../../AgentCheckpointService.js";
@@ -23,11 +24,8 @@ async function execute(
   const checkpointsByAgent = groupCheckpointsByAgent(checkpoints);
 
   // Build tree structure for checkpoint selection
-  const buildHistoryTree = () => {
-    const tree: any = {
-      name: "Agent Checkpoint History",
-      children: [],
-    };
+  const buildHistoryTree = () : TreeLeaf[] => {
+    const tree: TreeLeaf[] = [];
 
     const sortedAgentIds = Object.keys(checkpointsByAgent).sort();
 
@@ -39,9 +37,8 @@ async function execute(
         checkpoint: checkpoint,
       }));
 
-      tree.children.push({
+      tree.push({
         name: `🤖 Agent: ${agentId} (${agentCheckpoints.length} checkpoints)`,
-        hasChildren: true,
         children,
       });
     }
@@ -49,15 +46,20 @@ async function execute(
     return tree;
   };
 
-  // Show interactive tree selection
-  const selectedCheckpointId = await agent.askHuman({
-    type: "askForSingleTreeSelection",
-    title: "Select Checkpoint",
+  const selection = await agent.askQuestion({
     message: "Select checkpoint to view:",
-    tree: buildHistoryTree(),
+    question: {
+      type: 'treeSelect',
+      label: "Select Checkpoint",
+      key: "result",
+      minimumSelections: 1,
+      maximumSelections: 1,
+      tree: buildHistoryTree(),
+    }
   });
 
-  if (selectedCheckpointId) {
+  if (selection) {
+    const selectedCheckpointId = selection[0];
     const selectedCheckpoint = checkpoints.find(
       ({id}) => id === selectedCheckpointId,
     );

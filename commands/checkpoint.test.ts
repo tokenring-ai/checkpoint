@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { TokenRingAgentCommand } from '@tokenring-ai/agent/types';
+import {TokenRingAgentCommand} from '@tokenring-ai/agent/types';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import checkpointCommand from './checkpoint.js';
 
 // Mock Agent
@@ -14,7 +14,7 @@ const mockAgent = {
   getServiceByType: vi.fn(),
   infoMessage: vi.fn(),
   errorMessage: vi.fn(),
-  askHuman: vi.fn(),
+  askQuestion: vi.fn(),
   id: 'test-agent-id',
   name: 'test-agent',
   config: { type: 'test-agent-type' }
@@ -120,8 +120,8 @@ describe('Checkpoint Command', () => {
 
     describe('List Action (Default)', () => {
       beforeEach(() => {
-        // Mock askHuman for tree selection
-        mockAgent.askHuman.mockResolvedValue('checkpoint-1');
+        // Mock askQuestion for tree selection
+        mockAgent.askQuestion.mockResolvedValue('checkpoint-1');
       });
 
       it('should list checkpoints when none provided', async () => {
@@ -141,7 +141,7 @@ describe('Checkpoint Command', () => {
       it('should show interactive tree selection', async () => {
         await checkpointCommand.execute('list', mockAgent);
         
-        expect(mockAgent.askHuman).toHaveBeenCalledWith({
+        expect(mockAgent.askQuestion).toHaveBeenCalledWith({
           type: 'askForSingleTreeSelection',
           title: 'Select Checkpoint',
           message: 'Select a checkpoint to restore:',
@@ -153,7 +153,7 @@ describe('Checkpoint Command', () => {
       });
 
       it('should restore selected checkpoint from list', async () => {
-        mockAgent.askHuman.mockResolvedValue('checkpoint-1');
+        mockAgent.askQuestion.mockResolvedValue('checkpoint-1');
         
         await checkpointCommand.execute('list', mockAgent);
         
@@ -162,7 +162,7 @@ describe('Checkpoint Command', () => {
       });
 
       it('should handle cancellation of tree selection', async () => {
-        mockAgent.askHuman.mockResolvedValue(null);
+        mockAgent.askQuestion.mockResolvedValue(null);
         
         await checkpointCommand.execute('list', mockAgent);
         
@@ -172,7 +172,7 @@ describe('Checkpoint Command', () => {
 
       it('should handle tree selection errors', async () => {
         const error = new Error('Tree selection failed');
-        mockAgent.askHuman.mockRejectedValueOnce(error);
+        mockAgent.askQuestion.mockRejectedValueOnce(error);
         
         await checkpointCommand.execute('list', mockAgent);
         
@@ -238,13 +238,13 @@ describe('Checkpoint Command', () => {
     beforeEach(() => {
       vi.clearAllMocks();
       mockAgent.requireServiceByType.mockReturnValue(mockCheckpointService);
-      mockAgent.askHuman.mockResolvedValue('checkpoint-1');
+      mockAgent.askQuestion.mockResolvedValue('checkpoint-1');
     });
 
     it('should generate tree with correct structure', async () => {
       await checkpointCommand.execute('list', mockAgent);
       
-      const treeCall = mockAgent.askHuman.mock.calls.find(
+      const treeCall = mockAgent.askQuestion.mock.calls.find(
         call => call[0].type === 'askForSingleTreeSelection'
       );
       
@@ -277,7 +277,7 @@ describe('Checkpoint Command', () => {
       
       await checkpointCommand.execute('list', mockAgent);
       
-      const treeCall = mockAgent.askHuman.mock.calls.find(
+      const treeCall = mockAgent.askQuestion.mock.calls.find(
         call => call[0].type === 'askForSingleTreeSelection'
       );
       
@@ -303,7 +303,7 @@ describe('Checkpoint Command', () => {
       
       await checkpointCommand.execute('list', mockAgent);
       
-      const treeCall = mockAgent.askHuman.mock.calls.find(
+      const treeCall = mockAgent.askQuestion.mock.calls.find(
         call => call[0].type === 'askForSingleTreeSelection'
       );
       

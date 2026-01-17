@@ -20,37 +20,39 @@ export async function list(remainder: string, agent: Agent) {
   }
 
   // Construct tree for selection
-  const tree = {
-    name: "Checkpoint Selection",
-    children: Object.keys(grouped)
-      .sort((a, b) => b.localeCompare(a)) // Most recent first
-      .map((date) => ({
-        name: `📅 ${date} (${grouped[date].length} checkpoints)`,
-        value: date,
-        hasChildren: true,
-        children: grouped[date]
-          .sort((a, b) => b.createdAt - a.createdAt) // Most recent first within date
-          .map((cp, _index) => ({
-            name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - ${cp.name}`,
-            value: cp.id,
-          })),
-      })),
-  } as const;
+  const tree = Object.keys(grouped)
+    .sort((a, b) => b.localeCompare(a)) // Most recent first
+    .map((date) => ({
+      name: `📅 ${date} (${grouped[date].length} checkpoints)`,
+      value: date,
+      hasChildren: true,
+      children: grouped[date]
+        .sort((a, b) => b.createdAt - a.createdAt) // Most recent first within date
+        .map((cp, _index) => ({
+          name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - ${cp.name}`,
+          value: cp.id,
+        })),
+    }));
 
-  // Show interactive tree selection
   try {
-    const selectedId = await agent.askHuman({
-      type: "askForSingleTreeSelection",
-      title: "Select Checkpoint",
+    const selection = await agent.askQuestion({
       message: "Select a checkpoint to restore:",
-      tree,
+      question: {
+        type: 'treeSelect',
+        label: "Select Checkpoint",
+        key: "result",
+        minimumSelections: 1,
+        maximumSelections: 1,
+        tree,
+      }
     });
 
-    if (!selectedId) {
+    if (selection == null) {
       agent.infoMessage("Checkpoint selection cancelled. No changes made.");
       return;
     }
 
+    const selectedId = selection[0];
     await checkpointService.restoreAgentCheckpoint(
       selectedId,
       agent,

@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import type { HookConfig } from '@tokenring-ai/agent/types';
-import autoCheckpointHook from './autoCheckpoint.js';
+import type {HookConfig} from '@tokenring-ai/agent/types';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import AgentCheckpointService from '../AgentCheckpointService.js';
+import autoCheckpointHook from './autoCheckpoint.js';
 
 // Mock Agent
 const mockAgent = {
@@ -15,7 +15,7 @@ const mockAgent = {
   getServiceByType: vi.fn(),
   infoMessage: vi.fn(),
   errorMessage: vi.fn(),
-  askHuman: vi.fn(),
+  askQuestion: vi.fn(),
   id: 'test-agent-id',
   name: 'test-agent',
   config: { type: 'test-agent-type' }
