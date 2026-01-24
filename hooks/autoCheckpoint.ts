@@ -3,6 +3,7 @@ import {HookConfig} from "@tokenring-ai/agent/types";
 import AgentCheckpointService from "../AgentCheckpointService.js";
 
 const name = "autoCheckpoint";
+const displayName = "Checkpoint/Auto Checkpoint";
 const description = "Automatically saves agent checkpoints after input is handled";
 
 async function autoCheckpoint(agent: Agent, message: string): Promise<void> {
@@ -14,6 +15,7 @@ async function autoCheckpoint(agent: Agent, message: string): Promise<void> {
 
 export default {
   name,
+  displayName,
   description,
   afterAgentInputComplete: autoCheckpoint,
   beforeChatCompletion: autoCheckpoint,
