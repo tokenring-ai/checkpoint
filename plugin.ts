@@ -1,5 +1,6 @@
 import {AgentCommandService, AgentLifecycleService} from "@tokenring-ai/agent";
 import {TokenRingPlugin} from "@tokenring-ai/app";
+import {RpcService} from "@tokenring-ai/rpc";
 import {WebHostService} from "@tokenring-ai/web-host";
 import JsonRpcResource from "@tokenring-ai/web-host/JsonRpcResource";
 
@@ -29,8 +30,8 @@ export default {
     app.waitForService(AgentLifecycleService, lifecycleService =>
       lifecycleService.addHooks(packageJSON.name, hooks)
     );
-    app.waitForService(WebHostService, webHostService => {
-      webHostService.registerResource("Checkpoint RPC endpoint", new JsonRpcResource(app, checkpointRPC));
+    app.waitForService(RpcService, rpcService => {
+      rpcService.registerEndpoint(checkpointRPC);
     });
   },
   config: packageConfigSchema

@@ -1,7 +1,8 @@
-import {JsonRPCSchema} from "@tokenring-ai/web-host/jsonrpc/types";
+import {RPCSchema} from "@tokenring-ai/rpc/types";
 import {z} from "zod";
 
 export default {
+  name: "Checkpoint RPC",
   path: "/rpc/checkpoint",
   methods: {
     listCheckpoints: {
@@ -40,4 +41,4 @@ export default {
       })
     }
   }
-} satisfies JsonRPCSchema;
+} satisfies RPCSchema;

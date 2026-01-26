@@ -243,7 +243,7 @@ describe('Checkpoint Integration', () => {
 
   describe('Performance Integration', () => {
     it('should handle concurrent operations', async () => {
-      const promises = [
+      const promises: Array<Promise<string>> = [
         checkpointService.saveAgentCheckpoint('Concurrent 1', agent),
         checkpointService.saveAgentCheckpoint('Concurrent 2', agent),
         checkpointService.saveAgentCheckpoint('Concurrent 3', agent)

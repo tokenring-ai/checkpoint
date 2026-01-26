@@ -1,10 +1,10 @@
 import AgentManager from "@tokenring-ai/agent/services/AgentManager";
 import TokenRingApp from "@tokenring-ai/app";
-import {createJsonRPCEndpoint} from "@tokenring-ai/web-host/jsonrpc/createJsonRPCEndpoint";
+import {createRPCEndpoint} from "@tokenring-ai/rpc/createRPCEndpoint";
 import AgentCheckpointService from "../AgentCheckpointService.ts";
 import CheckpointRpcSchema from "./schema.ts";
 
-export default createJsonRPCEndpoint(CheckpointRpcSchema, {
+export default createRPCEndpoint(CheckpointRpcSchema, {
   async listCheckpoints(_args, app: TokenRingApp) {
     const checkpointService = app.requireService(AgentCheckpointService);
     return await checkpointService.checkpointProvider.listCheckpoints();

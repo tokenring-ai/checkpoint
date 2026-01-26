@@ -13,7 +13,7 @@ async function execute(
   const checkpointStorage = agent.requireServiceByType(AgentCheckpointService);
 
   // Get all agent checkpoints
-  const checkpoints = await checkpointStorage.listCheckpoints(agent);
+  const checkpoints = await checkpointStorage.listCheckpoints();
 
   if (!checkpoints || checkpoints.length === 0) {
     agent.infoMessage("No checkpoint history found.");

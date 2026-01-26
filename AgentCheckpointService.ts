@@ -39,7 +39,7 @@ export default class AgentCheckpointService implements TokenRingService {
     agent.restoreState(checkpoint.state);
   }
 
-  async listCheckpoints(agent: Agent) {
+  async listCheckpoints() {
     return await this.checkpointProvider.listCheckpoints();
   }
 }

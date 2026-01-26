@@ -3,7 +3,7 @@ import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
 export async function list(remainder: string, agent: Agent) {
   const checkpointService = agent.requireServiceByType(AgentCheckpointService)
-  const savedCheckpoints = await checkpointService.listCheckpoints(agent);
+  const savedCheckpoints = await checkpointService.listCheckpoints();
   if (savedCheckpoints.length === 0) {
     agent.infoMessage(
       "No checkpoints saved. Use /checkpoint create to make one.",
