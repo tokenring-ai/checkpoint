@@ -52,12 +52,12 @@ Main service for checkpoint operations. Automatically installed when the package
 - `setCheckpointProvider(provider)` - Set the checkpoint storage provider
 - `saveAgentCheckpoint(name, agent)` - Save agent state to a checkpoint
 - `restoreAgentCheckpoint(id, agent)` - Restore agent from checkpoint
-- `listCheckpoints(agent)` - List all available checkpoints
+- `listCheckpoints()` - List all available checkpoints
 
 **Example:**
 
 ```typescript
-import AgentCheckpointService from '@tokenring-ai/checkpoint/AgentCheckpointService.ts';
+import AgentCheckpointService from '@tokenring-ai/checkpoint/AgentCheckpointService';
 
 const checkpointService = agent.requireServiceByType(AgentCheckpointService);
 
@@ -71,7 +71,7 @@ const checkpointId = await checkpointService.saveAgentCheckpoint(
 await checkpointService.restoreAgentCheckpoint(checkpointId, agent);
 
 // List all checkpoints
-const checkpoints = await checkpointService.listCheckpoints(agent);
+const checkpoints = await checkpointService.listCheckpoints();
 ```
 
 ### AgentCheckpointProvider
@@ -82,13 +82,13 @@ Interface for implementing custom checkpoint storage backends.
 interface AgentCheckpointProvider {
   // Optional startup method
   start?(): Promise<void>;
-  
+
   // Save checkpoint and return its ID
   storeCheckpoint(data: NamedAgentCheckpoint): Promise<string>;
-  
+
   // Retrieve checkpoint by ID
   retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>;
-  
+
   // List all stored checkpoints (without state data)
   listCheckpoints(): Promise<AgentCheckpointListItem[]>;
 }
@@ -197,6 +197,8 @@ For each selected checkpoint:
 - Agent ID
 - Full checkpoint details including state data (when retrievable)
 
+The `/history` command displays detailed checkpoint information, including the checkpoint state, organized by agent sessions. It shows timestamps, checkpoint names, and allows viewing the full state of each checkpoint.
+
 ## Hooks
 
 ### `autoCheckpoint`
@@ -204,8 +206,9 @@ For each selected checkpoint:
 Automatically creates a checkpoint after each agent input is processed. Enabled by default when the package is installed.
 
 **Hook Points:**
-- `afterAgentInputComplete`
-- `beforeChatCompletion`
+
+- `afterAgentInputComplete` - Triggered after agent successfully processes input
+- `beforeChatCompletion` - Triggered before chat response is generated
 
 **Behavior:**
 
@@ -235,6 +238,7 @@ The package provides JSON-RPC endpoints for remote checkpoint operations.
 Query all available checkpoints without state data.
 
 **Request:**
+
 ```json
 {
   "method": "listCheckpoints",
@@ -243,6 +247,7 @@ Query all available checkpoints without state data.
 ```
 
 **Response:**
+
 ```json
 {
   "result": [
@@ -261,6 +266,7 @@ Query all available checkpoints without state data.
 Retrieve a specific checkpoint with full state data.
 
 **Request:**
+
 ```json
 {
   "method": "getCheckpoint",
@@ -271,6 +277,7 @@ Retrieve a specific checkpoint with full state data.
 ```
 
 **Response:**
+
 ```json
 {
   "result": {
@@ -279,12 +286,12 @@ Retrieve a specific checkpoint with full state data.
     "agentId": "agent-456",
     "createdAt": 1640995200000,
     "state": {
-      "agentState": {...},
-      "chatMessages": [...],
-      "CommandHistoryState": {...},
-      "HooksState": {...},
-      "AgentEventState": {...},
-      "CostTrackingState": {...}
+      "agentState": {},
+      "chatMessages": [],
+      "CommandHistoryState": {},
+      "HooksState": {},
+      "AgentEventState": {},
+      "CostTrackingState": {}
     }
   }
 }
@@ -295,6 +302,7 @@ Retrieve a specific checkpoint with full state data.
 Create a new agent from a checkpoint.
 
 **Request:**
+
 ```json
 {
   "method": "launchAgentFromCheckpoint",
@@ -306,6 +314,7 @@ Create a new agent from a checkpoint.
 ```
 
 **Response:**
+
 ```json
 {
   "result": {
@@ -321,7 +330,7 @@ Create a new agent from a checkpoint.
 ### Basic Checkpoint Workflow
 
 ```typescript
-import AgentCheckpointService from '@tokenring-ai/checkpoint/AgentCheckpointService.ts';
+import AgentCheckpointService from '@tokenring-ai/checkpoint/AgentCheckpointService';
 
 const service = agent.requireServiceByType(AgentCheckpointService);
 
@@ -335,7 +344,7 @@ const id1 = await service.saveAgentCheckpoint('Before Changes', agent);
 const id2 = await service.saveAgentCheckpoint('After Changes', agent);
 
 // List all checkpoints
-const all = await service.listCheckpoints(agent);
+const all = await service.listCheckpoints();
 console.log(`Total checkpoints: ${all.length}`);
 
 // Restore from earlier checkpoint
@@ -345,7 +354,7 @@ await service.restoreAgentCheckpoint(id1, agent);
 ### Custom Storage Provider
 
 ```typescript
-import type { AgentCheckpointProvider, NamedAgentCheckpoint, StoredAgentCheckpoint, AgentCheckpointListItem } from '@tokenring-ai/checkpoint/AgentCheckpointProvider.ts';
+import type { AgentCheckpointProvider, NamedAgentCheckpoint, StoredAgentCheckpoint, AgentCheckpointListItem } from '@tokenring-ai/checkpoint/AgentCheckpointProvider';
 
 class CustomProvider implements AgentCheckpointProvider {
   private checkpoints = new Map<string, StoredAgentCheckpoint>();
@@ -438,7 +447,7 @@ export default {
 import { z } from 'zod';
 
 const CheckpointConfigSchema = z.object({
-  provider: z.looseObject({
+  checkpoint: z.looseObject({
     type: z.string(),
   })
 });
@@ -454,7 +463,7 @@ The package defines the interface; storage providers are implemented by:
 **Example Provider:**
 
 ```typescript
-import type { AgentCheckpointProvider } from '@tokenring-ai/checkpoint/AgentCheckpointProvider.ts';
+import type { AgentCheckpointProvider } from '@tokenring-ai/checkpoint/AgentCheckpointProvider';
 
 class MemoryCheckpointProvider implements AgentCheckpointProvider {
   private checkpoints = new Map<string, any>();
@@ -516,17 +525,19 @@ bun run test:coverage     # Coverage report
 The package uses a plugin architecture for automatic integration:
 
 ```typescript
-import { AgentCommandService, AgentLifecycleService } from "@tokenring-ai/agent";
-import { TokenRingPlugin } from "@tokenring-ai/app";
-import { WebHostService } from "@tokenring-ai/web-host";
+import {AgentCommandService, AgentLifecycleService} from "@tokenring-ai/agent";
+import {TokenRingPlugin} from "@tokenring-ai/app";
+import {RpcService} from "@tokenring-ai/rpc";
+import {WebHostService} from "@tokenring-ai/web-host";
 import JsonRpcResource from "@tokenring-ai/web-host/JsonRpcResource";
-import { z } from "zod";
+
+import {z} from "zod";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
 import chatCommands from "./chatCommands.ts";
 import hooks from "./hooks.ts";
-import { CheckpointConfigSchema } from "./schema.ts";
 import packageJSON from "./package.json" with { type: "json" };
 import checkpointRPC from "./rpc/checkpoint.ts";
+import {CheckpointConfigSchema} from "./schema.ts";
 
 const packageConfigSchema = z.object({
   checkpoint: CheckpointConfigSchema
@@ -546,8 +557,8 @@ export default {
     app.waitForService(AgentLifecycleService, lifecycleService =>
       lifecycleService.addHooks(packageJSON.name, hooks)
     );
-    app.waitForService(WebHostService, webHostService => {
-      webHostService.registerResource("Checkpoint RPC endpoint", new JsonRpcResource(app, checkpointRPC));
+    app.waitForService(RpcService, rpcService => {
+      rpcService.registerEndpoint(checkpointRPC);
     });
   },
   config: packageConfigSchema
