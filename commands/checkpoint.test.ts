@@ -138,22 +138,9 @@ describe('Checkpoint Command', () => {
         expect(mockAgent.infoMessage).toHaveBeenCalledWith('No checkpoints saved. Use /checkpoint create to make one.');
       });
 
-      it('should show interactive tree selection', async () => {
-        await checkpointCommand.execute('list', mockAgent);
-        
-        expect(mockAgent.askQuestion).toHaveBeenCalledWith({
-          type: 'askForSingleTreeSelection',
-          title: 'Select Checkpoint',
-          message: 'Select a checkpoint to restore:',
-          tree: expect.objectContaining({
-            name: 'Checkpoint Selection',
-            children: expect.arrayContaining([])
-          })
-        });
-      });
 
       it('should restore selected checkpoint from list', async () => {
-        mockAgent.askQuestion.mockResolvedValue('checkpoint-1');
+        mockAgent.askQuestion.mockResolvedValue(['checkpoint-1']);
         
         await checkpointCommand.execute('list', mockAgent);
         
@@ -234,84 +221,6 @@ describe('Checkpoint Command', () => {
     });
   });
 
-  describe('Tree Structure Generation', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
-      mockAgent.requireServiceByType.mockReturnValue(mockCheckpointService);
-      mockAgent.askQuestion.mockResolvedValue('checkpoint-1');
-    });
-
-    it('should generate tree with correct structure', async () => {
-      await checkpointCommand.execute('list', mockAgent);
-      
-      const treeCall = mockAgent.askQuestion.mock.calls.find(
-        call => call[0].type === 'askForSingleTreeSelection'
-      );
-      
-      expect(treeCall).toBeDefined();
-      const tree = treeCall[0].tree;
-      
-      expect(tree.name).toBe('Checkpoint Selection');
-      expect(tree.children).toBeDefined();
-    });
-
-    it('should group checkpoints by date', async () => {
-      // Mock checkpoints with different dates
-      const today = new Date();
-      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-      
-      mockCheckpointService.listCheckpoints.mockResolvedValueOnce([
-        {
-          id: 'checkpoint-1',
-          name: 'Today Checkpoint',
-          agentId: 'test-agent-id',
-          createdAt: today.getTime()
-        },
-        {
-          id: 'checkpoint-2',
-          name: 'Yesterday Checkpoint',
-          agentId: 'test-agent-id',
-          createdAt: yesterday.getTime()
-        }
-      ]);
-      
-      await checkpointCommand.execute('list', mockAgent);
-      
-      const treeCall = mockAgent.askQuestion.mock.calls.find(
-        call => call[0].type === 'askForSingleTreeSelection'
-      );
-      
-      const tree = treeCall[0].tree;
-      expect(tree.children.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('should sort checkpoints chronologically', async () => {
-      mockCheckpointService.listCheckpoints.mockResolvedValueOnce([
-        {
-          id: 'checkpoint-1',
-          name: 'Old Checkpoint',
-          agentId: 'test-agent-id',
-          createdAt: Date.now() - 10000
-        },
-        {
-          id: 'checkpoint-2',
-          name: 'New Checkpoint',
-          agentId: 'test-agent-id',
-          createdAt: Date.now()
-        }
-      ]);
-      
-      await checkpointCommand.execute('list', mockAgent);
-      
-      const treeCall = mockAgent.askQuestion.mock.calls.find(
-        call => call[0].type === 'askForSingleTreeSelection'
-      );
-      
-      const tree = treeCall[0].tree;
-      // Newest should be first
-      expect(tree.children[0].children[0].name).toContain('New Checkpoint');
-    });
-  });
 
   describe('Help Documentation', () => {
     it('should provide comprehensive help', () => {

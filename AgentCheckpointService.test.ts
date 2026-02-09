@@ -45,7 +45,7 @@ describe('AgentCheckpointService', () => {
     
     app.addServices(lifecycleService);
 
-    service = new AgentCheckpointService();
+    service = new AgentCheckpointService({});
     service.setCheckpointProvider(mockProvider);
     app.addServices(service);
 
@@ -65,14 +65,14 @@ describe('AgentCheckpointService', () => {
     it('should implement TokenRingService interface', () => {
       expect(service.name).toBeDefined();
       expect(service.description).toBeDefined();
-      expect(typeof service.run).toBe('function');
+      expect(typeof service.start).toBe('function');
     });
   });
 
 
   describe('Service Lifecycle', () => {
-    it('should run successfully', async () => {
-      await expect(service.run()).resolves.not.toThrow();
+    it('should start successfully', async () => {
+      await expect(service.start()).resolves.not.toThrow();
     });
 
     it('should attach to agent', async () => {
@@ -102,20 +102,21 @@ describe('AgentCheckpointService', () => {
           name: 'Test Checkpoint',
           state: {
             "AgentEventState": {
-              "busyWith": null,
               "events": [
                 {
                   "timestamp": expect.any(Number),
+                  "message": "",
                   "type": "agent.created",
                 },
               ],
-              "idle": true,
-              "statusLine": null,
             },
+            "AgentExecutionState": {},
             "CommandHistoryState": {
               "commands": [],
             },
-            "CostTrackingState": {},
+            "CostTrackingState": {
+              "costs": {}
+            },
             "HooksState": {
               "enabledHooks": [
                "@tokenring-ai/checkpoint/autoCheckpoint",

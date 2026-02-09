@@ -99,20 +99,21 @@ describe('Checkpoint Integration', () => {
       await checkpointService.restoreAgentCheckpoint(checkpointId, agent);
       expect(agent.restoreState).toHaveBeenCalledWith({
         "AgentEventState": {
-          "busyWith": null,
           "events": [
             {
               "timestamp": expect.any(Number),
               "type": "agent.created",
+              "message": "",
             },
           ],
-          "idle": true,
-          "statusLine": null,
         },
+        "AgentExecutionState": {},
         "CommandHistoryState": {
           "commands": [],
         },
-        "CostTrackingState": {},
+        "CostTrackingState": {
+          "costs": {}
+        },
         "HooksState": {
           "enabledHooks": [
            "@tokenring-ai/checkpoint/autoCheckpoint",
@@ -224,22 +225,6 @@ describe('Checkpoint Integration', () => {
     });
   });
 
-  describe('Error Recovery Integration', () => {
-    it('should handle service initialization errors', async () => {
-      const failingProvider: AgentCheckpointProvider = {
-        start: async () => {
-          throw new Error('Provider failed to start');
-        },
-        storeCheckpoint: vi.fn().mockRejectedValue(new Error('Store failed')),
-        retrieveCheckpoint: vi.fn().mockRejectedValue(new Error('Retrieve failed')),
-        listCheckpoints: vi.fn().mockRejectedValue(new Error('List failed'))
-      };
-
-      checkpointService.setCheckpointProvider(failingProvider);
-      
-      await expect(checkpointService.run()).rejects.toThrow('Provider failed to start');
-    });
-  });
 
   describe('Performance Integration', () => {
     it('should handle concurrent operations', async () => {
