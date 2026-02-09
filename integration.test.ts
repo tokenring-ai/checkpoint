@@ -14,7 +14,7 @@ vi.mock('@tokenring-ai/web-host');
 vi.mock('@tokenring-ai/web-host/JsonRpcResource');
 
 class WebHostService {
-  name = "WebHostService"
+  readonly name = "WebHostService"
   description = "Provides access to the Web Host API"
   static registerResource = vi.fn()
 }

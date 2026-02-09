@@ -6,13 +6,13 @@ import type {AgentCheckpointProvider} from "./AgentCheckpointProvider.js";
 import {CheckpointConfigSchema} from "./schema.ts";
 
 export default class AgentCheckpointService implements TokenRingService {
-  name = "AgentCheckpointService";
+  readonly name = "AgentCheckpointService";
   description = "Persists agent state to a storage provider";
 
   checkpointProvider!: AgentCheckpointProvider;
   constructor(readonly options: z.output<typeof CheckpointConfigSchema>) {}
 
-  async run(): Promise<void> {
+  async start(): Promise<void> {
     if (!this.checkpointProvider) throw new Error(`CheckpointProvider of type ${this.options.provider.type} not found`);
     await this.checkpointProvider.start?.();
   }

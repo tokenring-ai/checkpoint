@@ -4,7 +4,7 @@ import indent from "@tokenring-ai/utility/string/indent";
 import type {AgentCheckpointListItem} from "../../AgentCheckpointProvider.js";
 import AgentCheckpointService from "../../AgentCheckpointService.js";
 
-const description: string = "/history - Browse and view agent checkpoint history";
+
 
 async function execute(
   _remainder: string,
@@ -159,27 +159,7 @@ async function displayCheckpointDetails(
   agent.infoMessage(lines.join("\n"));
 }
 
-const help: string = `# /history - Browse and view agent checkpoint history
 
-With no arguments: Browse all checkpoints using interactive tree selection grouped by agent ID with detailed checkpoint information
-
-## Features
-
-- Interactive tree navigation
-- Grouped by agent ID (sessions)
-- Shows checkpoint details including state data
-- Chronological ordering (newest first)
-
-## Examples
-
-/history                    - Browse all checkpoints
-/history                    - Select and view checkpoint details
-
-## Output
-
-- Tree view with agent groups and checkpoints
-- Detailed checkpoint information including state
-- Error handling for corrupted checkpoints`;
 
 export async function history(
   _remainder: string,
