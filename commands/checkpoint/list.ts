@@ -1,14 +1,12 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
-export async function list(remainder: string, agent: Agent) {
+export async function list(remainder: string, agent: Agent): Promise<string> {
   const checkpointService = agent.requireServiceByType(AgentCheckpointService)
   const savedCheckpoints = await checkpointService.listCheckpoints();
   if (savedCheckpoints.length === 0) {
-    agent.infoMessage(
-      "No checkpoints saved. Use /checkpoint create to make one.",
-    );
-    return;
+    return "No checkpoints saved. Use /checkpoint create to make one.";
   }
 
   // Group checkpoints by date (YYYY-MM-DD)
@@ -48,8 +46,7 @@ export async function list(remainder: string, agent: Agent) {
     });
 
     if (selection == null) {
-      agent.infoMessage("Checkpoint selection cancelled. No changes made.");
-      return;
+      return "Checkpoint selection cancelled. No changes made.";
     }
 
     const selectedId = selection[0];
@@ -58,8 +55,8 @@ export async function list(remainder: string, agent: Agent) {
       agent,
     );
 
-    agent.infoMessage(`Checkpoint ${selectedId} loaded`);
+    return `Checkpoint ${selectedId} loaded`;
   } catch (error) {
-    agent.errorMessage(`Error during checkpoint selection: ${error}`);
+    throw new CommandFailedError(`Error during checkpoint selection: ${error}`);
   }
 }

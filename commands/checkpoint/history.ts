@@ -1,5 +1,6 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import type {TreeLeaf} from "@tokenring-ai/agent/question";
+import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import indent from "@tokenring-ai/utility/string/indent";
 import type {AgentCheckpointListItem} from "../../AgentCheckpointProvider.js";
 import AgentCheckpointService from "../../AgentCheckpointService.js";
@@ -9,15 +10,14 @@ import AgentCheckpointService from "../../AgentCheckpointService.js";
 async function execute(
   _remainder: string,
   agent: Agent,
-): Promise<void> {
+): Promise<string> {
   const checkpointStorage = agent.requireServiceByType(AgentCheckpointService);
 
   // Get all agent checkpoints
   const checkpoints = await checkpointStorage.listCheckpoints();
 
   if (!checkpoints || checkpoints.length === 0) {
-    agent.infoMessage("No checkpoint history found.");
-    return;
+    return "No checkpoint history found.";
   }
 
   // Group checkpoints by agentId (equivalent to sessions)
@@ -64,19 +64,18 @@ async function execute(
       ({id}) => id === selectedCheckpointId,
     );
     if (!selectedCheckpoint) {
-      agent.errorMessage(
+      throw new CommandFailedError(
         `Checkpoint ${selectedCheckpointId} could not be retrieved.`,
       );
-      return;
     }
 
-    await displayCheckpointDetails(
+    return await displayCheckpointDetails(
       selectedCheckpoint,
       checkpointStorage,
       agent,
     );
   } else {
-    agent.infoMessage("Checkpoint browsing cancelled.");
+    return "Checkpoint browsing cancelled.";
   }
 }
 
@@ -117,7 +116,7 @@ async function displayCheckpointDetails(
   checkpointItem: AgentCheckpointListItem,
   checkpointStorage: AgentCheckpointService,
   agent: Agent,
-): Promise<void> {
+): Promise<string> {
   const lines: string[] = [
     `\n=== Checkpoint: ${checkpointItem.name} ===`,
     `ID: ${checkpointItem.id}`,
@@ -141,11 +140,6 @@ async function displayCheckpointDetails(
 
     lines.push(`\n--- End of Checkpoint Details ---\n`);
   } catch (error) {
-    agent.errorMessage(
-      `Error loading checkpoint ${checkpointItem.id}:`,
-      error as Error,
-    );
-
     // Show basic info even if retrieval fails
     lines.push(`\n📋 Checkpoint Information:`);
     lines.push(`- Name: ${checkpointItem.name}`);
@@ -156,7 +150,7 @@ async function displayCheckpointDetails(
     lines.push(`\n--- End of Checkpoint Details ---\n`);
   }
 
-  agent.infoMessage(lines.join("\n"));
+  return lines.join("\n");
 }
 
 
@@ -164,6 +158,6 @@ async function displayCheckpointDetails(
 export async function history(
   _remainder: string,
   agent: Agent,
-): Promise<void> {
-  await execute(_remainder, agent);
+): Promise<string> {
+  return await execute(_remainder, agent);
 }
