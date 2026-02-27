@@ -28,7 +28,7 @@ export default createRPCEndpoint(CheckpointRpcSchema, {
 
     return {
       agentId: agent.id,
-      agentName: agent.name,
+      agentName: agent.displayName,
       agentType: agent.config.agentType,
     };
   }

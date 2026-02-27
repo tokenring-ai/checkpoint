@@ -1,5 +1,5 @@
 import checkpoint from "./commands/checkpoint.ts";
 
-export default {
+export default [
   checkpoint,
-};
+];

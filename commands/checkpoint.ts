@@ -59,6 +59,7 @@ const help: string = `# /checkpoint - Create or restore conversation checkpoints
 - Checkpoints are automatically organized by date`;
 
 export default {
+  name: "checkpoint",
   description,
   execute,
   help,

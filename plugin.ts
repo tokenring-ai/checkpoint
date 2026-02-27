@@ -4,7 +4,7 @@ import {RpcService} from "@tokenring-ai/rpc";
 
 import {z} from "zod";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
-import chatCommands from "./chatCommands.ts";
+import agentCommands from "./commands.ts";
 import hooks from "./hooks.ts";
 import packageJSON from "./package.json" with {type: "json"};
 import checkpointRPC from "./rpc/checkpoint.ts";
@@ -23,7 +23,7 @@ export default {
     app.addServices(checkpointService);
 
     app.waitForService(AgentCommandService, agentCommandService =>
-      agentCommandService.addAgentCommands(chatCommands)
+      agentCommandService.addAgentCommands(agentCommands)
     );
     app.waitForService(AgentLifecycleService, lifecycleService =>
       lifecycleService.addHooks(packageJSON.name, hooks)
