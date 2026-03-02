@@ -194,7 +194,7 @@ Show interactive tree selection of all checkpoints, grouped by date. Select one 
 
 #### `history`
 
-Browse checkpoint history grouped by agent session with detailed information.
+Browse checkpoint history grouped by agent ID with detailed information.
 
 ```
 /checkpoint history
@@ -217,19 +217,19 @@ Browse checkpoint history grouped by agent session with detailed information.
 - Indicates most recent checkpoints first
 - Shows full checkpoint details in history view
 
-### `/history`
+### `/checkpoint history`
 
-Browse and view checkpoint history grouped by agent session.
+Browse and view checkpoint history grouped by agent ID.
 
 **Syntax:**
 
 ```
-/history
+/checkpoint history
 ```
 
 Shows an interactive tree selection where checkpoints are grouped by:
 
-1. Agent ID (session)
+1. Agent ID
 2. Individual checkpoints within each agent (sorted by creation time, newest first)
 
 **Display Information:**
@@ -487,7 +487,7 @@ Automatically creates a checkpoint after each agent input is processed. Enabled 
 
 **Behavior:**
 
-- Triggered after agent successfully processes input
+- Triggered after agent successfully processes input or before chat completion
 - Uses the input message as the checkpoint label
 - Runs silently without interrupting workflow
 - Can be disabled via agent hook management
@@ -518,10 +518,6 @@ State slices are managed by the agent's checkpoint mechanism, including:
 - Cost tracking state
 - Todo state
 - Chat messages
-
-## Scripting Integration
-
-The package registers functions with the ScriptingService for programmatic checkpoint operations.
 
 ## Usage Examples
 
@@ -633,7 +629,7 @@ export default {
 
 **Automatically Provides:**
 
-- Chat commands (`/checkpoint`, `/history`)
+- Chat commands (`/checkpoint`, `/checkpoint history`)
 - Auto-checkpoint hook
 - `AgentCheckpointService` service instance
 - RPC endpoints for remote operations
@@ -648,7 +644,7 @@ import {RpcService} from "@tokenring-ai/rpc";
 
 import {z} from "zod";
 import AgentCheckpointService from "./AgentCheckpointService.js";
-import chatCommands from "./chatCommands.js";
+import agentCommands from "./commands.js";
 import hooks from "./hooks.js";
 import packageJSON from "./package.json" with { type: "json" };
 import checkpointRPC from "./rpc/checkpoint.js";
@@ -667,7 +663,7 @@ export default {
     app.addServices(checkpointService);
 
     app.waitForService(AgentCommandService, agentCommandService =>
-      agentCommandService.addAgentCommands(chatCommands)
+      agentCommandService.addAgentCommands(agentCommands)
     );
     app.waitForService(AgentLifecycleService, lifecycleService =>
       lifecycleService.addHooks(packageJSON.name, hooks)
@@ -756,7 +752,7 @@ pkg/checkpoint/
 ├── schema.ts                       # Configuration schema definition
 ├── plugin.ts                       # Plugin registration
 ├── index.ts                        # Package exports
-├── chatCommands.ts                 # Command definitions
+├── commands.ts                     # Command definitions
 ├── hooks.ts                        # Hook definitions
 ├── hooks/
 │   └── autoCheckpoint.ts          # Auto-checkpointing hook
@@ -771,6 +767,24 @@ pkg/checkpoint/
 │   └── schema.ts                   # RPC schema definition
 ├── README.md                       # This file
 └── package.json
+```
+
+## Exports
+
+The package exports the following:
+
+```typescript
+// Main service
+import AgentCheckpointService from '@tokenring-ai/checkpoint/AgentCheckpointService';
+
+// Provider interface
+import type {AgentCheckpointProvider} from '@tokenring-ai/checkpoint/AgentCheckpointProvider';
+
+// Configuration schema
+import {CheckpointConfigSchema} from '@tokenring-ai/checkpoint';
+
+// Plugin
+import checkpointPlugin from '@tokenring-ai/checkpoint';
 ```
 
 ## License

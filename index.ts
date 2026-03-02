@@ -2,8 +2,9 @@ import {z} from "zod";
 
 export const CheckpointConfigSchema = z.object({
   provider: z.looseObject({
-   type: "string"
+    type: z.string()
   })
 });
 
-export {default as AgentStateStorage} from "../checkpoint/AgentCheckpointService.ts";
+export {default as AgentCheckpointService} from "./AgentCheckpointService.js";
+export {default as AgentStateStorage} from "./AgentCheckpointService.js";
