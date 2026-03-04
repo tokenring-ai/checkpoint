@@ -1,22 +1,18 @@
-import type Agent from "@tokenring-ai/agent/Agent";
-import {HookConfig} from "@tokenring-ai/agent/types";
+import {HookSubscription} from "@tokenring-ai/agent/types";
+import {AfterAgentInputHandled, HookCallback} from "@tokenring-ai/agent/util/hooks";
 import AgentCheckpointService from "../AgentCheckpointService.js";
 
 const name = "autoCheckpoint";
 const displayName = "Checkpoint/Auto Checkpoint";
 const description = "Automatically saves agent checkpoints after input is handled";
 
-async function autoCheckpoint(agent: Agent, message: string): Promise<void> {
-  const storage = agent.getServiceByType(AgentCheckpointService);
-  if (storage) {
-    await storage.saveAgentCheckpoint(message, agent);
-  }
-}
+const callbacks = [
+  new HookCallback(AfterAgentInputHandled, async ({ input }, agent): Promise<void> => {
+    const storage = agent.getServiceByType(AgentCheckpointService);
+    if (storage) {
+      await storage.saveAgentCheckpoint(input.message, agent);
+    }
+  })
+];
 
-export default {
-  name,
-  displayName,
-  description,
-  afterAgentInputComplete: autoCheckpoint,
-  beforeChatCompletion: autoCheckpoint,
-} satisfies HookConfig;
+export default { name, displayName, description, callbacks } satisfies HookSubscription;

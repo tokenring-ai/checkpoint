@@ -3,8 +3,8 @@ import createTestingAgent from "@tokenring-ai/agent/test/createTestingAgent";
 import TokenRingApp from "@tokenring-ai/app";
 import createTestingApp from "@tokenring-ai/app/test/createTestingApp";
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import type {AgentCheckpointProvider} from './AgentCheckpointProvider.js';
 import AgentCheckpointService from './AgentCheckpointService.js';
+import type {AgentCheckpointStorage} from './AgentCheckpointStorage.js';
 import checkpointCommand from './commands/checkpoint.js';
 import {history} from './commands/checkpoint/history.js';
 import autoCheckpointHook from './hooks/autoCheckpoint.js';
@@ -20,7 +20,7 @@ class WebHostService {
 }
 
 // Mock provider with realistic implementation
-function createMockProvider() : AgentCheckpointProvider {
+function createMockProvider() : AgentCheckpointStorage {
   const checkpoints = new Map<string, any>();
 
   return {
@@ -49,7 +49,7 @@ function createMockProvider() : AgentCheckpointProvider {
         createdAt: cp.createdAt
       }));
     }
-  } satisfies AgentCheckpointProvider;
+  } satisfies AgentCheckpointStorage;
 }
 
 

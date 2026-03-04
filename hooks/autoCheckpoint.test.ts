@@ -1,4 +1,4 @@
-import type {HookConfig} from '@tokenring-ai/agent/types';
+import type {HookSubscription} from '@tokenring-ai/agent/types';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import AgentCheckpointService from '../AgentCheckpointService.js';
 import autoCheckpointHook from './autoCheckpoint.js';
@@ -44,7 +44,7 @@ describe('Auto-Checkpoint Hook', () => {
     });
 
     it('should implement HookConfig interface', () => {
-      const hook: HookConfig = autoCheckpointHook;
+      const hook: HookSubscription = autoCheckpointHook;
       expect(hook.name).toBeDefined();
       expect(hook.description).toBeDefined();
       expect(typeof hook.afterAgentInputComplete).toBe('function');

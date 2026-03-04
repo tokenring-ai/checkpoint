@@ -19,7 +19,7 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    const checkpointService = new AgentCheckpointService(config.checkpoint);
+    const checkpointService = new AgentCheckpointService(app, config.checkpoint);
     app.addServices(checkpointService);
 
     app.waitForService(AgentCommandService, agentCommandService =>

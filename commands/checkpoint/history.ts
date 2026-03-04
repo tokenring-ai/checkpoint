@@ -1,10 +1,10 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import type {TreeLeaf} from "@tokenring-ai/agent/question";
+import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import indent from "@tokenring-ai/utility/string/indent";
-import type {AgentCheckpointListItem} from "../../AgentCheckpointProvider.js";
 import AgentCheckpointService from "../../AgentCheckpointService.js";
+import type {AgentCheckpointListItem} from "../../AgentCheckpointStorage.js";
 
 function groupCheckpointsByAgent(checkpoints: AgentCheckpointListItem[]): Record<string, AgentCheckpointListItem[]> {
   const grouped: Record<string, AgentCheckpointListItem[]> = {};
@@ -29,7 +29,7 @@ async function displayCheckpointDetails(checkpointItem: AgentCheckpointListItem,
     `Created: ${new Date(checkpointItem.createdAt).toLocaleString()}`,
   ];
   try {
-    const fullCheckpoint = await checkpointStorage.checkpointProvider.retrieveCheckpoint(checkpointItem.id);
+    const fullCheckpoint = await checkpointStorage.retrieveCheckpoint(checkpointItem.id);
     if (fullCheckpoint) {
       lines.push(`\n📋 Checkpoint State:`);
       for (const [name, stateData] of Object.entries(fullCheckpoint.state.agentState)) {

@@ -8,10 +8,10 @@ export interface StoredAgentCheckpoint extends NamedAgentCheckpoint {
   id: string;
 }
 
-export type AgentCheckpointListItem = Omit<StoredAgentCheckpoint, "state" | "config">;
+export type AgentCheckpointListItem = Omit<StoredAgentCheckpoint, "state">;
 
-export interface AgentCheckpointProvider {
-  start?(): Promise<void>;
+export interface AgentCheckpointStorage {
+  displayName: string;
   storeCheckpoint(data: NamedAgentCheckpoint): Promise<string>;
 
   retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>;

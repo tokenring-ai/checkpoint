@@ -1,8 +1,8 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import type {AgentCheckpointListItem, AgentCheckpointProvider, NamedAgentCheckpoint, StoredAgentCheckpoint} from './AgentCheckpointProvider.js';
+import type {AgentCheckpointListItem, AgentCheckpointStorage, NamedAgentCheckpoint, StoredAgentCheckpoint} from './AgentCheckpointStorage.js';
 
 describe('AgentCheckpointProvider Interface', () => {
-  let provider: AgentCheckpointProvider & {
+  let provider: AgentCheckpointStorage & {
     start: () => Promise<void>;
     storeCheckpoint: (data: NamedAgentCheckpoint) => Promise<string>;
     retrieveCheckpoint: (id: string) => Promise<StoredAgentCheckpoint | null>;

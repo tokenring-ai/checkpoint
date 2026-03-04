@@ -2,12 +2,12 @@ import {Agent, AgentLifecycleService} from '@tokenring-ai/agent';
 import createTestingAgent from "@tokenring-ai/agent/test/createTestingAgent";
 import createTestingApp from "@tokenring-ai/app/test/createTestingApp";
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import type {AgentCheckpointProvider} from './AgentCheckpointProvider.js';
 import AgentCheckpointService from './AgentCheckpointService.js';
+import type {AgentCheckpointStorage} from './AgentCheckpointStorage.js';
 import autoCheckpointHook from './hooks/autoCheckpoint.js';
 
 // Mock provider
-const mockProvider: AgentCheckpointProvider = {
+const mockProvider: AgentCheckpointStorage = {
   start: vi.fn().mockResolvedValue(undefined),
   storeCheckpoint: vi.fn().mockResolvedValue('checkpoint-id-123'),
   retrieveCheckpoint: vi.fn().mockResolvedValue({
