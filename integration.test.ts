@@ -6,7 +6,7 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import AgentCheckpointService from './AgentCheckpointService.js';
 import type {AgentCheckpointStorage} from './AgentCheckpointStorage.js';
 import checkpointCommand from './commands/checkpoint.js';
-import {history} from './commands/checkpoint/history.js';
+import {history} from './commands/agent-checkpoint/history.js';
 import autoCheckpointHook from './hooks/autoCheckpoint.js';
 import checkpointRPC from './rpc/checkpoint.js';
 
@@ -26,7 +26,7 @@ function createMockProvider() : AgentCheckpointStorage {
   return {
     start: async () => {},
 
-    storeCheckpoint: async (data) => {
+    storeAgentCheckpoint: async (data) => {
       const id = `checkpoint-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       const checkpoint = {
         id,
@@ -37,11 +37,11 @@ function createMockProvider() : AgentCheckpointStorage {
       return id;
     },
 
-    retrieveCheckpoint: async (id) => {
+    retrieveAgentCheckpoint: async (id) => {
       return checkpoints.get(id) || null;
     },
 
-    listCheckpoints: async () => {
+    listAgentCheckpoints: async () => {
       return Array.from(checkpoints.values()).map(cp => ({
         id: cp.id,
         name: cp.name,
@@ -91,7 +91,7 @@ describe('Checkpoint Integration', () => {
       expect(checkpointId).toMatch(/^checkpoint-\d+-.+$/);
 
       // 2. List checkpoints
-      const checkpoints = await checkpointService.listCheckpoints();
+      const checkpoints = await checkpointService.listAgentCheckpoints();
       expect(checkpoints).toHaveLength(1);
       expect(checkpoints[0].name).toBe('Integration Test');
 
@@ -133,7 +133,7 @@ describe('Checkpoint Integration', () => {
       expect(checkpoint1).not.toBe(checkpoint2);
 
       // List should show both
-      const checkpoints = await checkpointService.listCheckpoints();
+      const checkpoints = await checkpointService.listAgentCheckpoints();
       // First checkpoint is automatically created when agent starts
       expect(checkpoints).toHaveLength(2);
 
@@ -147,7 +147,7 @@ describe('Checkpoint Integration', () => {
     it('should execute checkpoint create command', async () => {
       await checkpointCommand.execute('create Integration Test Command', agent);
       
-      const checkpoints = await checkpointService.listCheckpoints();
+      const checkpoints = await checkpointService.listAgentCheckpoints();
       expect(checkpoints).toHaveLength(1);
       expect(checkpoints[0].name).toBe('Integration Test Command');
     });
@@ -180,7 +180,7 @@ describe('Checkpoint Integration', () => {
       await autoCheckpointHook.afterAgentInputComplete(agent, message);
       
       // Check if checkpoint was saved
-      const checkpoints = await checkpointService.listCheckpoints();
+      const checkpoints = await checkpointService.listAgentCheckpoints();
       expect(checkpoints.length).toBeGreaterThan(0);
     });
   });
@@ -216,11 +216,11 @@ describe('Checkpoint Integration', () => {
       const id = await checkpointService.saveAgentCheckpoint('Provider Test', agent);
       expect(id).toBeDefined();
       
-      const checkpoint = await checkpointService.checkpointProvider.retrieveCheckpoint(id);
+      const checkpoint = await checkpointService.checkpointProvider.retrieveAgentCheckpoint(id);
       expect(checkpoint).not.toBeNull();
       expect(checkpoint.name).toBe('Provider Test');
       
-      const list = await checkpointService.listCheckpoints();
+      const list = await checkpointService.listAgentCheckpoints();
       expect(list).toHaveLength(1);
     });
   });
@@ -248,7 +248,7 @@ describe('Checkpoint Integration', () => {
       }
       
       const listTime = Date.now();
-      const checkpoints = await checkpointService.listCheckpoints();
+      const checkpoints = await checkpointService.listAgentCheckpoints();
       const endTime = Date.now();
       
       expect(checkpoints).toHaveLength(50);

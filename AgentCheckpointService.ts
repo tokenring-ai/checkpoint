@@ -3,16 +3,15 @@ import Agent from "@tokenring-ai/agent/Agent";
 import type {AgentCreationContext} from "@tokenring-ai/agent/types";
 import type TokenRingApp from "@tokenring-ai/app";
 import {TokenRingService} from "@tokenring-ai/app/types";
-import {z} from "zod";
 import type {AgentCheckpointStorage} from "./AgentCheckpointStorage.js";
-import {CheckpointConfigSchema} from "./schema.ts";
+import {type ParsedAgentCheckpointConfig} from "./schema.ts";
 
 export default class AgentCheckpointService implements TokenRingService {
   readonly name = "AgentCheckpointService";
   description = "Persists agent state to a storage provider";
 
   checkpointProvider: AgentCheckpointStorage | null = null;
-  constructor(readonly app: TokenRingApp, readonly options: z.output<typeof CheckpointConfigSchema>) {}
+  constructor(readonly app: TokenRingApp, readonly options: ParsedAgentCheckpointConfig) {}
 
   async start(): Promise<void> {
     if (!this.checkpointProvider) {
@@ -36,31 +35,31 @@ export default class AgentCheckpointService implements TokenRingService {
     if (!this.checkpointProvider) {
       throw new Error("No checkpoint provider is registered");
     }
-    return await this.checkpointProvider.storeCheckpoint({
+    return await this.checkpointProvider.storeAgentCheckpoint({
       name,
       ...agent.generateCheckpoint(),
     });
   }
 
   async restoreAgentCheckpoint(id: string, agent: Agent): Promise<void> {
-    const checkpoint = await this.retrieveCheckpoint(id);
+    const checkpoint = await this.retrieveAgentCheckpoint(id);
     if (!checkpoint) {
       throw new Error(`Checkpoint ${id} not found`);
     }
     agent.restoreState(checkpoint.state);
   }
 
-  async listCheckpoints() {
+  async listAgentCheckpoints() {
     if (!this.checkpointProvider) {
       throw new Error("No checkpoint provider is registered");
     }
-    return await this.checkpointProvider.listCheckpoints();
+    return await this.checkpointProvider.listAgentCheckpoints();
   }
 
-  async retrieveCheckpoint(checkpointId: string) {
+  async retrieveAgentCheckpoint(checkpointId: string) {
     if (!this.checkpointProvider) {
       throw new Error("No checkpoint provider is registered");
     }
-    return await this.checkpointProvider.retrieveCheckpoint(checkpointId);
+    return await this.checkpointProvider.retrieveAgentCheckpoint(checkpointId);
   }
 }

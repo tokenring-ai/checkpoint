@@ -29,10 +29,10 @@ async function displayCheckpointDetails(checkpointItem: AgentCheckpointListItem,
     `Created: ${new Date(checkpointItem.createdAt).toLocaleString()}`,
   ];
   try {
-    const fullCheckpoint = await checkpointStorage.retrieveCheckpoint(checkpointItem.id);
+    const fullCheckpoint = await checkpointStorage.retrieveAgentCheckpoint(checkpointItem.id);
     if (fullCheckpoint) {
       lines.push(`\n📋 Checkpoint State:`);
-      for (const [name, stateData] of Object.entries(fullCheckpoint.state.agentState)) {
+      for (const [name, stateData] of Object.entries(fullCheckpoint.state)) {
         lines.push(`\n${name}:`);
         lines.push(indent(JSON.stringify(stateData, null, 2), 1));
       }
@@ -46,7 +46,7 @@ async function displayCheckpointDetails(checkpointItem: AgentCheckpointListItem,
 
 async function execute(_remainder: string, agent: Agent): Promise<string> {
   const checkpointStorage = agent.requireServiceByType(AgentCheckpointService);
-  const checkpoints = await checkpointStorage.listCheckpoints();
+  const checkpoints = await checkpointStorage.listAgentCheckpoints();
   if (!checkpoints?.length) return "No checkpoint history found.";
 
   const checkpointsByAgent = groupCheckpointsByAgent(checkpoints);
@@ -71,14 +71,14 @@ async function execute(_remainder: string, agent: Agent): Promise<string> {
 }
 
 export default {
-  name: "checkpoint history",
-  description: "/checkpoint history - Browse checkpoint history grouped by agent",
-  help: `# /checkpoint history
+  name: "agent checkpoint history",
+  description: "/agent checkpoint history - Browse checkpoint history grouped by agent",
+  help: `# /agent checkpoint history
 
 Browse checkpoint history grouped by agent. Select a checkpoint to view its full details.
 
 ## Example
 
-/checkpoint history`,
+/agent checkpoint history`,
   execute,
 } satisfies TokenRingAgentCommand;

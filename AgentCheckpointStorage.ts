@@ -12,9 +12,7 @@ export type AgentCheckpointListItem = Omit<StoredAgentCheckpoint, "state">;
 
 export interface AgentCheckpointStorage {
   displayName: string;
-  storeCheckpoint(data: NamedAgentCheckpoint): Promise<string>;
-
-  retrieveCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>;
-
-  listCheckpoints(): Promise<AgentCheckpointListItem[]>;
+  storeAgentCheckpoint(data: NamedAgentCheckpoint): Promise<string>;
+  retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>;
+  listAgentCheckpoints(): Promise<AgentCheckpointListItem[]>;
 }

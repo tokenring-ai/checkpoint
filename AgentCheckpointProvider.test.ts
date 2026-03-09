@@ -4,9 +4,9 @@ import type {AgentCheckpointListItem, AgentCheckpointStorage, NamedAgentCheckpoi
 describe('AgentCheckpointProvider Interface', () => {
   let provider: AgentCheckpointStorage & {
     start: () => Promise<void>;
-    storeCheckpoint: (data: NamedAgentCheckpoint) => Promise<string>;
-    retrieveCheckpoint: (id: string) => Promise<StoredAgentCheckpoint | null>;
-    listCheckpoints: () => Promise<AgentCheckpointListItem[]>;
+    storeAgentCheckpoint: (data: NamedAgentCheckpoint) => Promise<string>;
+    retrieveAgentCheckpoint: (id: string) => Promise<StoredAgentCheckpoint | null>;
+    listAgentCheckpoints: () => Promise<AgentCheckpointListItem[]>;
   };
 
   beforeEach(() => {
@@ -44,15 +44,15 @@ describe('AgentCheckpointProvider Interface', () => {
     });
 
     it('should have storeCheckpoint method', () => {
-      expect(typeof provider.storeCheckpoint).toBe('function');
+      expect(typeof provider.storeAgentCheckpoint).toBe('function');
     });
 
     it('should have retrieveCheckpoint method', () => {
-      expect(typeof provider.retrieveCheckpoint).toBe('function');
+      expect(typeof provider.retrieveAgentCheckpoint).toBe('function');
     });
 
     it('should have listCheckpoints method', () => {
-      expect(typeof provider.listCheckpoints).toBe('function');
+      expect(typeof provider.listAgentCheckpoints).toBe('function');
     });
   });
 
@@ -129,14 +129,14 @@ describe('AgentCheckpointProvider Interface', () => {
         previousResponseId: 'test-response-id'
       };
 
-      const result = await provider.storeCheckpoint(checkpointData);
+      const result = await provider.storeAgentCheckpoint(checkpointData);
       
       expect(result).toBe('mock-checkpoint-id');
-      expect(provider.storeCheckpoint).toHaveBeenCalledWith(checkpointData);
+      expect(provider.storeAgentCheckpoint).toHaveBeenCalledWith(checkpointData);
     });
 
     it('should retrieve checkpoint', async () => {
-      const result = await provider.retrieveCheckpoint('mock-checkpoint-id');
+      const result = await provider.retrieveAgentCheckpoint('mock-checkpoint-id');
       
       expect(result).toMatchObject({
         id: 'mock-checkpoint-id',
@@ -150,15 +150,15 @@ describe('AgentCheckpointProvider Interface', () => {
     });
 
     it('should return null when checkpoint not found', async () => {
-      provider.retrieveCheckpoint.mockResolvedValueOnce(null);
+      provider.retrieveAgentCheckpoint.mockResolvedValueOnce(null);
       
-      const result = await provider.retrieveCheckpoint('non-existent-id');
+      const result = await provider.retrieveAgentCheckpoint('non-existent-id');
       
       expect(result).toBeNull();
     });
 
     it('should list checkpoints', async () => {
-      const result = await provider.listCheckpoints();
+      const result = await provider.listAgentCheckpoints();
       
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
@@ -172,7 +172,7 @@ describe('AgentCheckpointProvider Interface', () => {
 
   describe('Error Handling', () => {
     it('should handle storage errors', async () => {
-      provider.storeCheckpoint.mockRejectedValueOnce(new Error('Storage failed'));
+      provider.storeAgentCheckpoint.mockRejectedValueOnce(new Error('Storage failed'));
       
       const checkpointData: NamedAgentCheckpoint = {
         name: 'Test Checkpoint',
@@ -181,21 +181,21 @@ describe('AgentCheckpointProvider Interface', () => {
         previousResponseId: 'test-response-id'
       };
 
-      await expect(provider.storeCheckpoint(checkpointData))
+      await expect(provider.storeAgentCheckpoint(checkpointData))
         .rejects.toThrow('Storage failed');
     });
 
     it('should handle retrieval errors', async () => {
-      provider.retrieveCheckpoint.mockRejectedValueOnce(new Error('Retrieval failed'));
+      provider.retrieveAgentCheckpoint.mockRejectedValueOnce(new Error('Retrieval failed'));
       
-      await expect(provider.retrieveCheckpoint('test-id'))
+      await expect(provider.retrieveAgentCheckpoint('test-id'))
         .rejects.toThrow('Retrieval failed');
     });
 
     it('should handle listing errors', async () => {
-      provider.listCheckpoints.mockRejectedValueOnce(new Error('Listing failed'));
+      provider.listAgentCheckpoints.mockRejectedValueOnce(new Error('Listing failed'));
       
-      await expect(provider.listCheckpoints())
+      await expect(provider.listAgentCheckpoints())
         .rejects.toThrow('Listing failed');
     });
   });

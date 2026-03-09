@@ -8,3 +8,5 @@ export const CheckpointConfigSchema = z.object({
 
 export {default as AgentCheckpointService} from "./AgentCheckpointService.js";
 export {default as AgentStateStorage} from "./AgentCheckpointService.js";
+
+export type {AppCheckpointStorage, AppSessionListItem, StoredAppCheckpoint} from "./AppCheckpointStorage.js";

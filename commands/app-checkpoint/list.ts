@@ -1,12 +1,12 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
-import AgentCheckpointService from "../../AgentCheckpointService.ts";
+import AppCheckpointService from "../../AppCheckpointService.ts";
 
 async function execute(remainder: string, agent: Agent): Promise<string> {
-  const checkpointService = agent.requireServiceByType(AgentCheckpointService);
-  const savedCheckpoints = await checkpointService.listCheckpoints();
-  if (savedCheckpoints.length === 0) return "No checkpoints saved. Use /checkpoint create to make one.";
+  const checkpointService = agent.requireServiceByType(AppCheckpointService);
+  const savedCheckpoints = await checkpointService.listAppCheckpoints();
+  if (savedCheckpoints.length === 0) return "No checkpoints saved. Use /app checkpoint create to make one.";
 
   const grouped: Record<string, typeof savedCheckpoints> = {};
   for (const cp of savedCheckpoints) {
@@ -22,7 +22,7 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
       hasChildren: true,
       children: grouped[date]
         .sort((a, b) => b.createdAt - a.createdAt)
-        .map(cp => ({ name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - ${cp.name}`, value: cp.id })),
+        .map(cp => ({ name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - Session ${cp.sessionId}@${cp.hostname}:${cp.workingDirectory}`, value: cp.id })),
     }));
 
   try {
@@ -31,7 +31,7 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
       question: { type: 'treeSelect', label: "Select Checkpoint", key: "result", minimumSelections: 1, maximumSelections: 1, tree },
     });
     if (selection == null) return "Checkpoint selection cancelled. No changes made.";
-    await checkpointService.restoreAgentCheckpoint(selection[0], agent);
+    await checkpointService.restoreAppCheckpoint(selection[0]);
     return `Checkpoint ${selection[0]} loaded`;
   } catch (error) {
     throw new CommandFailedError(`Error during checkpoint selection: ${error}`);
@@ -39,14 +39,14 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
 }
 
 export default {
-  name: "checkpoint list",
-  description: "/checkpoint list - Interactive checkpoint browser",
-  help: `# /checkpoint list
+  name: "app checkpoint list",
+  description: "/app checkpoint list - Interactive checkpoint browser",
+  help: `# /app checkpoint list
 
 Open an interactive tree browser to select and restore a checkpoint. Checkpoints are grouped by date, newest first.
 
 ## Example
 
-/checkpoint list`,
+/app checkpoint list`,
   execute,
 } satisfies TokenRingAgentCommand;

@@ -51,7 +51,7 @@ describe('Checkpoint Command', () => {
 
   describe('Command Configuration', () => {
     it('should export correct description', () => {
-      expect(checkpointCommand.description).toBe('/checkpoint - Create or restore conversation checkpoints to resume chat');
+      expect(checkpointCommand.description).toBe('/agent checkpoint - Create or restore conversation checkpoints to resume chat');
     });
 
     it('should implement TokenRingAgentCommand interface', () => {
@@ -107,7 +107,7 @@ describe('Checkpoint Command', () => {
       it('should show error when no ID provided', async () => {
         await checkpointCommand.execute('restore', mockAgent);
         
-        expect(mockAgent.errorMessage).toHaveBeenCalledWith('Usage: /checkpoint restore <id> (see /checkpoint list for ids)');
+        expect(mockAgent.errorMessage).toHaveBeenCalledWith('Usage: /agent checkpoint restore <id> (see /agent checkpoint list for ids)');
         expect(mockCheckpointService.restoreAgentCheckpoint).not.toHaveBeenCalled();
       });
 
@@ -135,7 +135,7 @@ describe('Checkpoint Command', () => {
         
         await checkpointCommand.execute('list', mockAgent);
         
-        expect(mockAgent.infoMessage).toHaveBeenCalledWith('No checkpoints saved. Use /checkpoint create to make one.');
+        expect(mockAgent.infoMessage).toHaveBeenCalledWith('No checkpoints saved. Use /agent checkpoint create to make one.');
       });
 
 
@@ -226,7 +226,7 @@ describe('Checkpoint Command', () => {
     it('should provide comprehensive help', () => {
       const help = checkpointCommand.help;
       
-      expect(help).toContain('/checkpoint - Create or restore conversation checkpoints');
+      expect(help).toContain('/agent checkpoint - Create or restore conversation checkpoints');
       expect(help).toContain('create [label]');
       expect(help).toContain('restore <id>');
       expect(help).toContain('list');

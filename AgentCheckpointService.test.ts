@@ -9,8 +9,8 @@ import autoCheckpointHook from './hooks/autoCheckpoint.js';
 // Mock provider
 const mockProvider: AgentCheckpointStorage = {
   start: vi.fn().mockResolvedValue(undefined),
-  storeCheckpoint: vi.fn().mockResolvedValue('checkpoint-id-123'),
-  retrieveCheckpoint: vi.fn().mockResolvedValue({
+  storeAgentCheckpoint: vi.fn().mockResolvedValue('checkpoint-id-123'),
+  retrieveAgentCheckpoint: vi.fn().mockResolvedValue({
     id: 'checkpoint-id-123',
     name: 'Test Checkpoint',
     agentId: 'test-agent-id',
@@ -19,7 +19,7 @@ const mockProvider: AgentCheckpointStorage = {
     config: { testConfig: 'mocked' },
     previousResponseId: 'test-response-id'
   }),
-  listCheckpoints: vi.fn().mockResolvedValue([
+  listAgentCheckpoints: vi.fn().mockResolvedValue([
     {
       id: 'checkpoint-id-123',
       name: 'Test Checkpoint',
@@ -95,7 +95,7 @@ describe('AgentCheckpointService', () => {
         
 
         expect(checkpointId).toBe('checkpoint-id-123');
-        expect(mockProvider.storeCheckpoint).toHaveBeenCalledExactlyOnceWith({
+        expect(mockProvider.storeAgentCheckpoint).toHaveBeenCalledExactlyOnceWith({
           agentId: mockAgent.id,
           createdAt: Date.now(),
           config: mockAgent.config,
@@ -132,7 +132,7 @@ describe('AgentCheckpointService', () => {
       it('should use default label when none provided', async () => {
         await service.saveAgentCheckpoint(undefined as any, mockAgent);
         
-        expect(mockProvider.storeCheckpoint).toHaveBeenCalled();
+        expect(mockProvider.storeAgentCheckpoint).toHaveBeenCalled();
       });
     });
 
@@ -141,12 +141,12 @@ describe('AgentCheckpointService', () => {
         vi.spyOn(mockAgent, 'restoreState')
         await service.restoreAgentCheckpoint('checkpoint-id-123', mockAgent);
         
-        expect(mockProvider.retrieveCheckpoint).toHaveBeenCalledWith('checkpoint-id-123');
+        expect(mockProvider.retrieveAgentCheckpoint).toHaveBeenCalledWith('checkpoint-id-123');
         expect(mockAgent.restoreState).toHaveBeenCalledWith({ testState: 'mocked' });
       });
 
       it('should throw error when checkpoint not found', async () => {
-        mockProvider.retrieveCheckpoint.mockResolvedValueOnce(null);
+        mockProvider.retrieveAgentCheckpoint.mockResolvedValueOnce(null);
         
         await expect(service.restoreAgentCheckpoint('non-existent', mockAgent))
           .rejects.toThrow('Checkpoint non-existent not found');
@@ -155,7 +155,7 @@ describe('AgentCheckpointService', () => {
 
     describe('listCheckpoints', () => {
       it('should list checkpoints successfully', async () => {
-        const checkpoints = await service.listCheckpoints();
+        const checkpoints = await service.listAgentCheckpoints();
         
         expect(checkpoints).toHaveLength(1);
         expect(checkpoints[0]).toMatchObject({

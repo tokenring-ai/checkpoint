@@ -162,7 +162,7 @@ Manage agent checkpoints - create, restore, list, or browse with interactive tre
 **Syntax:**
 
 ```
-/checkpoint [action] [args...]
+/agent checkpoint [action] [args...]
 ```
 
 **Actions:**
@@ -172,8 +172,8 @@ Manage agent checkpoints - create, restore, list, or browse with interactive tre
 Create a checkpoint of the current agent state with an optional label.
 
 ```
-/checkpoint create
-/checkpoint create "My Important Fix"
+/agent checkpoint create
+/agent checkpoint create "My Important Fix"
 ```
 
 #### `restore <id>`
@@ -181,7 +181,7 @@ Create a checkpoint of the current agent state with an optional label.
 Restore agent state from a specific checkpoint by ID.
 
 ```
-/checkpoint restore abc123def456
+/agent checkpoint restore abc123def456
 ```
 
 #### `list` (default)
@@ -189,8 +189,8 @@ Restore agent state from a specific checkpoint by ID.
 Show interactive tree selection of all checkpoints, grouped by date. Select one to restore.
 
 ```
-/checkpoint list
-/checkpoint              # Same as list
+/agent checkpoint list
+/agent checkpoint              # Same as list
 ```
 
 #### `history`
@@ -198,17 +198,17 @@ Show interactive tree selection of all checkpoints, grouped by date. Select one 
 Browse checkpoint history grouped by agent ID with detailed information.
 
 ```
-/checkpoint history
+/agent checkpoint history
 ```
 
 **Examples:**
 
 ```
-/checkpoint create              # Create with default label
-/checkpoint create "Bug Fix"    # Create with custom label
-/checkpoint restore xyz789      # Restore by ID
-/checkpoint list                # Browse and restore interactively
-/checkpoint history             # Browse checkpoint history
+/agent checkpoint create              # Create with default label
+/agent checkpoint create "Bug Fix"    # Create with custom label
+/agent checkpoint restore xyz789      # Restore by ID
+/agent checkpoint list                # Browse and restore interactively
+/agent checkpoint history             # Browse checkpoint history
 ```
 
 **Output:**
@@ -218,14 +218,14 @@ Browse checkpoint history grouped by agent ID with detailed information.
 - Indicates most recent checkpoints first
 - Shows full checkpoint details in history view
 
-### `/checkpoint history`
+### `/agent checkpoint history`
 
 Browse and view checkpoint history grouped by agent ID.
 
 **Syntax:**
 
 ```
-/checkpoint history
+/agent checkpoint history
 ```
 
 Shows an interactive tree selection where checkpoints are grouped by:
@@ -679,7 +679,7 @@ export default {
 
 **Automatically Provides:**
 
-- Chat commands (`/checkpoint`, `/checkpoint history`)
+- Chat commands (`/agent checkpoint`, `/agent checkpoint history`)
 - Auto-checkpoint hook
 - `AgentCheckpointService` service instance
 - RPC endpoints for remote operations
