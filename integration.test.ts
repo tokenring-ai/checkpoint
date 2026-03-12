@@ -114,7 +114,7 @@ describe('Checkpoint Integration', () => {
         "CostTrackingState": {
           "costs": {}
         },
-        "HooksState": {
+        "LifecycleState": {
           "enabledHooks": [
            "@tokenring-ai/checkpoint/autoCheckpoint",
           ],

@@ -117,7 +117,7 @@ describe('AgentCheckpointService', () => {
             "CostTrackingState": {
               "costs": {}
             },
-            "HooksState": {
+            "LifecycleState": {
               "enabledHooks": [
                "@tokenring-ai/checkpoint/autoCheckpoint",
               ],

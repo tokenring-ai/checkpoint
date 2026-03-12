@@ -1,8 +1,8 @@
-import {AgentLifecycleService} from "@tokenring-ai/agent";
 import Agent from "@tokenring-ai/agent/Agent";
 import type {AgentCreationContext} from "@tokenring-ai/agent/types";
 import type TokenRingApp from "@tokenring-ai/app";
 import {TokenRingService} from "@tokenring-ai/app/types";
+import {AgentLifecycleService} from "@tokenring-ai/lifecycle";
 import type {AgentCheckpointStorage} from "./AgentCheckpointStorage.js";
 import {type ParsedAgentCheckpointConfig} from "./schema.ts";
 
