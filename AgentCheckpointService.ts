@@ -21,9 +21,7 @@ export default class AgentCheckpointService implements TokenRingService {
 
   async attach(agent: Agent, creationContext: AgentCreationContext ): Promise<void> {
     creationContext.items.push(`Checkpoint Provider: ${this.checkpointProvider?.displayName ?? "(none)"}`);
-    if (this.checkpointProvider) {
-      agent.requireServiceByType(AgentLifecycleService).enableHooks(["@tokenring-ai/checkpoint/autoCheckpoint"], agent);
-    } else {
+    if (! this.checkpointProvider) {
       agent.warningMessage("No agent checkpoint provider is registered, agent checkpointing is disabled.");
     }
   }

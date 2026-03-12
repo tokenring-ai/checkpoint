@@ -31,7 +31,7 @@ export default {
       agentCommandService.addAgentCommands(agentCommands)
     );
     app.waitForService(AgentLifecycleService, lifecycleService =>
-      lifecycleService.addHooks(packageJSON.name, hooks)
+      lifecycleService.addHooks(hooks)
     );
     app.waitForService(RpcService, rpcService => {
       rpcService.registerEndpoint(checkpointRPC);
