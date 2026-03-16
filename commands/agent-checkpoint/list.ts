@@ -40,7 +40,7 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
 
 export default {
   name: "agent checkpoint list",
-  description: "/agent checkpoint list - Interactive checkpoint browser",
+  description: "Interactive checkpoint browser",
   help: `# /agent checkpoint list
 
 Open an interactive tree browser to select and restore a checkpoint. Checkpoints are grouped by date, newest first.

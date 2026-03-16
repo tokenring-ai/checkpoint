@@ -5,7 +5,7 @@ import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
 export default {
   name: "agent checkpoint restore",
-  description: "/agent checkpoint restore - Restore a checkpoint by ID",
+  description: "Restore a checkpoint by ID",
   help: `# /agent checkpoint restore <id>
 
 Restore a specific checkpoint by its ID. Use /agent checkpoint list to browse available IDs.

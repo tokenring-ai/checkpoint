@@ -40,7 +40,13 @@ export default class AppCheckpointService implements TokenRingService {
     if (!this.checkpointProvider) {
       throw new Error("No checkpoint provider is registered");
     }
-    return await this.checkpointProvider.storeAppCheckpoint(this.app.generateStateCheckpoint())
+    return await this.checkpointProvider.storeAppCheckpoint({
+      sessionId: this.app.sessionId,
+      createdAt: Date.now(),
+      hostname: this.options.hostname,
+      projectDirectory: this.options.projectDirectory,
+      state: this.app.generateStateCheckpoint(),
+    })
   }
 
   async restoreAppCheckpoint(id: string): Promise<void> {

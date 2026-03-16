@@ -22,7 +22,7 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
       hasChildren: true,
       children: grouped[date]
         .sort((a, b) => b.createdAt - a.createdAt)
-        .map(cp => ({ name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - Session ${cp.sessionId}@${cp.hostname}:${cp.workingDirectory}`, value: cp.id })),
+        .map(cp => ({name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - Session ${cp.sessionId}@${cp.hostname}:${cp.projectDirectory}`, value: cp.id})),
     }));
 
   try {
@@ -40,7 +40,7 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
 
 export default {
   name: "app checkpoint list",
-  description: "/app checkpoint list - Interactive checkpoint browser",
+  description: "Interactive checkpoint browser",
   help: `# /app checkpoint list
 
 Open an interactive tree browser to select and restore a checkpoint. Checkpoints are grouped by date, newest first.

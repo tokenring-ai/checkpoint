@@ -28,7 +28,7 @@ async function displayCheckpointDetails(checkpointItem: AppSessionListItem, chec
     `Session ID: ${checkpointItem.sessionId}`,
     `Created: ${new Date(checkpointItem.createdAt).toLocaleString()}`,
     `Hostname: ${checkpointItem.hostname}`,
-    `Working Directory: ${checkpointItem.workingDirectory}`,
+    `Working Directory: ${checkpointItem.projectDirectory}`,
   ];
   try {
     const fullCheckpoint = await checkpointStorage.retrieveAppCheckpoint(checkpointItem.sessionId);
@@ -44,7 +44,7 @@ async function displayCheckpointDetails(checkpointItem: AppSessionListItem, chec
     lines.push(`- Session ID: ${checkpointItem.sessionId}`);
     lines.push(`- Created: ${new Date(checkpointItem.createdAt).toLocaleString()}`);
     lines.push(`- Hostname: ${checkpointItem.hostname}`);
-    lines.push(`- Working Directory: ${checkpointItem.workingDirectory}`);
+    lines.push(`- Working Directory: ${checkpointItem.projectDirectory}`);
   }
   lines.push(`\n--- End of Checkpoint Details ---\n`);
   return lines.join("\n");
@@ -81,7 +81,7 @@ async function execute(_remainder: string, agent: Agent): Promise<string> {
 
 export default {
   name: "app checkpoint history",
-  description: "/app checkpoint history - Browse app checkpoint history",
+  description: "Browse app checkpoint history",
   help: `# /app checkpoint history
 
 Browse app checkpoint history grouped by date. Select a checkpoint to view its full details.

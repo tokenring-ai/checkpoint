@@ -1117,7 +1117,7 @@ class MemoryAppCheckpointProvider implements AppCheckpointStorage {
       id: cp.id,
       sessionId: cp.sessionId,
       hostname: cp.hostname,
-      workingDirectory: cp.workingDirectory,
+      projectDirectory: cp.projectDirectory,
       createdAt: cp.createdAt
     }));
   }

@@ -4,7 +4,7 @@ import AppCheckpointService from "../../AppCheckpointService.ts";
 
 export default {
   name: "app checkpoint create",
-  description: "/app checkpoint create - Create an app state checkpoint",
+  description: "Create an app state checkpoint",
   help: `# /app checkpoint create
 
 Create a checkpoint of the current app state

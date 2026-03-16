@@ -4,7 +4,7 @@ import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
 export default {
   name: "agent checkpoint create",
-  description: "/agent checkpoint create - Create a conversation checkpoint",
+  description: "Create a conversation checkpoint",
   help: `# /agent checkpoint create [label]
 
 Create a checkpoint of the current conversation state with an optional label.

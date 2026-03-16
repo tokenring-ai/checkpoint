@@ -72,7 +72,7 @@ async function execute(_remainder: string, agent: Agent): Promise<string> {
 
 export default {
   name: "agent checkpoint history",
-  description: "/agent checkpoint history - Browse checkpoint history grouped by agent",
+  description: "Browse checkpoint history grouped by agent",
   help: `# /agent checkpoint history
 
 Browse checkpoint history grouped by agent. Select a checkpoint to view its full details.
