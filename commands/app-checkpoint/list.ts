@@ -1,9 +1,13 @@
-import Agent from "@tokenring-ai/agent/Agent";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import AppCheckpointService from "../../AppCheckpointService.ts";
 
-async function execute(remainder: string, agent: Agent): Promise<string> {
+const inputSchema = {
+  args: {},
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
+
+async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointService = agent.requireServiceByType(AppCheckpointService);
   const savedCheckpoints = await checkpointService.listAppCheckpoints();
   if (savedCheckpoints.length === 0) return "No checkpoints saved. Use /app checkpoint create to make one.";
@@ -41,6 +45,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
 export default {
   name: "app checkpoint list",
   description: "Interactive checkpoint browser",
+  inputSchema,
+  execute,
   help: `# /app checkpoint list
 
 Open an interactive tree browser to select and restore a checkpoint. Checkpoints are grouped by date, newest first.
@@ -48,5 +54,4 @@ Open an interactive tree browser to select and restore a checkpoint. Checkpoints
 ## Example
 
 /app checkpoint list`,
-  execute,
-} satisfies TokenRingAgentCommand;
+} satisfies TokenRingAgentCommand<typeof inputSchema>;

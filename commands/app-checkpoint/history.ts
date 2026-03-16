@@ -1,7 +1,6 @@
-import Agent from "@tokenring-ai/agent/Agent";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import type {TreeLeaf} from "@tokenring-ai/agent/question";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import indent from "@tokenring-ai/utility/string/indent";
 import AppCheckpointService from "../../AppCheckpointService.js";
 import type {AppSessionListItem} from "../../AppCheckpointStorage.js";
@@ -50,7 +49,12 @@ async function displayCheckpointDetails(checkpointItem: AppSessionListItem, chec
   return lines.join("\n");
 }
 
-async function execute(_remainder: string, agent: Agent): Promise<string> {
+const inputSchema = {
+  args: {},
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
+
+async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointStorage = agent.requireServiceByType(AppCheckpointService);
   const checkpoints = await checkpointStorage.listAppCheckpoints();
   if (!checkpoints?.length) return "No app checkpoint history found.";
@@ -82,6 +86,8 @@ async function execute(_remainder: string, agent: Agent): Promise<string> {
 export default {
   name: "app checkpoint history",
   description: "Browse app checkpoint history",
+  inputSchema,
+  execute,
   help: `# /app checkpoint history
 
 Browse app checkpoint history grouped by date. Select a checkpoint to view its full details.
@@ -89,5 +95,4 @@ Browse app checkpoint history grouped by date. Select a checkpoint to view its f
 ## Example
 
 /app checkpoint history`,
-  execute,
-} satisfies TokenRingAgentCommand;
+} satisfies TokenRingAgentCommand<typeof inputSchema>;
