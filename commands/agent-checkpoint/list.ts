@@ -1,4 +1,5 @@
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
+import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
@@ -22,12 +23,10 @@ async function execute({prompt, agent}: AgentCommandInputType<typeof inputSchema
     (grouped[date] ??= []).push(cp);
   }
 
-  const tree = Object.keys(grouped)
+  const tree: TreeLeaf[] = Object.keys(grouped)
     .sort((a, b) => b.localeCompare(a))
     .map(date => ({
       name: `📅 ${date} (${grouped[date].length} checkpoints)`,
-      value: date,
-      hasChildren: true,
       children: grouped[date]
         .sort((a, b) => b.createdAt - a.createdAt)
         .map(cp => ({ name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - ${cp.name}`, value: cp.id })),
