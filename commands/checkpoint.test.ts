@@ -225,8 +225,8 @@ describe('Checkpoint Command', () => {
   describe('Help Documentation', () => {
     it('should provide comprehensive help', () => {
       const help = checkpointCommand.help;
-      
-      expect(help).toContain('/agent checkpoint - Create or restore conversation checkpoints');
+
+      expect(help).toContain('Create or restore conversation checkpoints');
       expect(help).toContain('create [label]');
       expect(help).toContain('restore <id>');
       expect(help).toContain('list');

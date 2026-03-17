@@ -3,15 +3,17 @@ import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
 const inputSchema = {
   args: {},
-  prompt: {
+  positionals: [{
+    name: "label",
     description: "Optional checkpoint label",
     required: false,
-  },
+    greedy: true,
+  }],
   allowAttachments: false,
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({prompt, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const label = prompt?.trim() || `New Checkpoint`;
+async function execute({positionals, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  const label = positionals.label || `New Checkpoint`;
   const checkpointId = await agent.requireServiceByType(AgentCheckpointService).saveAgentCheckpoint(label, agent);
   return `Checkpoint created: ${checkpointId}: ${label}`;
 }
@@ -21,12 +23,10 @@ export default {
   description: "Create a conversation checkpoint",
   inputSchema,
   execute,
-  help: `# /agent checkpoint create [label]
-
-Create a checkpoint of the current conversation state with an optional label.
+  help: `Create a checkpoint of the current conversation state with an optional label.
 
 ## Example
 
 /agent checkpoint create
-/agent checkpoint create 'My Fix'`,
+/agent checkpoint create My Fix`,
 } satisfies TokenRingAgentCommand<typeof inputSchema>;

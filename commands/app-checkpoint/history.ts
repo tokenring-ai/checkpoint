@@ -49,10 +49,7 @@ async function displayCheckpointDetails(checkpointItem: AppSessionListItem, chec
   return lines.join("\n");
 }
 
-const inputSchema = {
-  args: {},
-  allowAttachments: false,
-} as const satisfies AgentCommandInputSchema;
+const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointStorage = agent.requireServiceByType(AppCheckpointService);
@@ -88,9 +85,7 @@ export default {
   description: "Browse app checkpoint history",
   inputSchema,
   execute,
-  help: `# /app checkpoint history
-
-Browse app checkpoint history grouped by date. Select a checkpoint to view its full details.
+  help: `Browse app checkpoint history grouped by date. Select a checkpoint to view its full details.
 
 ## Example
 

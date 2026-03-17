@@ -5,14 +5,10 @@ import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
 const inputSchema = {
   args: {},
-  prompt: {
-    description: "Optional checkpoint ID to restore",
-    required: false,
-  },
   allowAttachments: false,
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({prompt, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointService = agent.requireServiceByType(AgentCheckpointService);
   const savedCheckpoints = await checkpointService.listAgentCheckpoints();
   if (savedCheckpoints.length === 0) return "No checkpoints saved. Use /agent checkpoint create to make one.";
@@ -50,9 +46,7 @@ export default {
   description: "Interactive checkpoint browser",
   inputSchema,
   execute,
-  help: `# /agent checkpoint list
-
-Open an interactive tree browser to select and restore a checkpoint. Checkpoints are grouped by date, newest first.
+  help: `Open an interactive tree browser to select and restore a checkpoint. Checkpoints are grouped by date, newest first.
 
 ## Example
 
