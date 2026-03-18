@@ -3,17 +3,11 @@ import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
 const inputSchema = {
   args: {},
-  positionals: [{
-    name: "label",
-    description: "Optional checkpoint label",
-    required: false,
-    greedy: true,
-  }],
-  allowAttachments: false,
+  remainder: {name: "label", description: "Optional checkpoint label", defaultValue: "New Checkpoint"}
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({positionals, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const label = positionals.label || `New Checkpoint`;
+async function execute({remainder, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  const label = remainder;
   const checkpointId = await agent.requireServiceByType(AgentCheckpointService).saveAgentCheckpoint(label, agent);
   return `Checkpoint created: ${checkpointId}: ${label}`;
 }

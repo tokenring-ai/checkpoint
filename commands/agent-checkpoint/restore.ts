@@ -9,8 +9,7 @@ const inputSchema = {
       description: "The checkpoint ID to restore",
       required: true,
     },
-  ],
-  allowAttachments: false,
+  ]
 } as const satisfies AgentCommandInputSchema;
 
 async function execute({positionals: {checkpointId}, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {

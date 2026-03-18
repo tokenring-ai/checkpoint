@@ -4,8 +4,7 @@ import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} f
 import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
 const inputSchema = {
-  args: {},
-  allowAttachments: false,
+  args: {}
 } as const satisfies AgentCommandInputSchema;
 
 async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
