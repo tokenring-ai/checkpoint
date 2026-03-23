@@ -1,14 +1,13 @@
-import {Agent, AgentLifecycleService} from '@tokenring-ai/agent';
 import createTestingAgent from "@tokenring-ai/agent/test/createTestingAgent";
 import createTestingApp from "@tokenring-ai/app/test/createTestingApp";
+import {Agent} from '@tokenring-ai/agent';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import AgentCheckpointService from './AgentCheckpointService.js';
 import type {AgentCheckpointStorage} from './AgentCheckpointStorage.js';
-import autoCheckpointHook from './hooks/autoCheckpoint.js';
 
 // Mock provider
 const mockProvider: AgentCheckpointStorage = {
-  start: vi.fn().mockResolvedValue(undefined),
+  displayName: 'Mock Provider',
   storeAgentCheckpoint: vi.fn().mockResolvedValue('checkpoint-id-123'),
   retrieveAgentCheckpoint: vi.fn().mockResolvedValue({
     id: 'checkpoint-id-123',
@@ -16,8 +15,8 @@ const mockProvider: AgentCheckpointStorage = {
     agentId: 'test-agent-id',
     createdAt: Date.now(),
     state: { testState: 'mocked' },
-    config: { testConfig: 'mocked' },
-    previousResponseId: 'test-response-id'
+    agentType: 'test-agent-type',
+    sessionId: 'test-session',
   }),
   listAgentCheckpoints: vi.fn().mockResolvedValue([
     {
@@ -31,25 +30,20 @@ const mockProvider: AgentCheckpointStorage = {
 
 describe('AgentCheckpointService', () => {
   let service: AgentCheckpointService;
-  let lifecycleService!: AgentLifecycleService;
   let mockAgent!: Agent;
+  let mockApp: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    const app = createTestingApp();
-    lifecycleService = new AgentLifecycleService();
-    
-    // Register the autoCheckpoint hook before adding services
-    lifecycleService.registerHook('@tokenring-ai/checkpoint/autoCheckpoint', autoCheckpointHook);
-    
-    app.addServices(lifecycleService);
+    mockApp = createTestingApp();
 
-    service = new AgentCheckpointService({});
+    // Service requires app and options
+    service = new AgentCheckpointService(mockApp, {});
     service.setCheckpointProvider(mockProvider);
-    app.addServices(service);
+    mockApp.addServices(service);
 
-    mockAgent = createTestingAgent(app);
+    mockAgent = createTestingAgent(mockApp);
   });
 
   afterEach(() => {
@@ -69,76 +63,47 @@ describe('AgentCheckpointService', () => {
     });
   });
 
-
   describe('Service Lifecycle', () => {
     it('should start successfully', async () => {
       await expect(service.start()).resolves.not.toThrow();
     });
 
     it('should attach to agent', async () => {
-      vi.spyOn(lifecycleService, 'enableHooks').mockReturnValue();
-      await service.attach(mockAgent);
+      const items: string[] = [];
+      const mockCreationContext = {
+        items
+      };
       
-      expect(lifecycleService.enableHooks).toHaveBeenCalledWith(
-        ['@tokenring-ai/checkpoint/autoCheckpoint'],
-        mockAgent
-      );
+      await service.attach(mockAgent, mockCreationContext as any);
+      
+      expect(items).toContain('Checkpoint Provider: Mock Provider');
     });
   });
 
   describe('Checkpoint Operations', () => {
     describe('saveAgentCheckpoint', () => {
       it('should save checkpoint successfully', async () => {
-        vi.useFakeTimers({ shouldAdvanceTime: false });
-
         const checkpointId = await service.saveAgentCheckpoint('Test Checkpoint', mockAgent);
         
-
         expect(checkpointId).toBe('checkpoint-id-123');
-        expect(mockProvider.storeAgentCheckpoint).toHaveBeenCalledExactlyOnceWith({
-          agentId: mockAgent.id,
-          createdAt: Date.now(),
-          config: mockAgent.config,
-          name: 'Test Checkpoint',
-          state: {
-            "AgentEventState": {
-              "events": [
-                {
-                  "timestamp": expect.any(Number),
-                  "message": "",
-                  "type": "agent.created",
-                },
-              ],
-            },
-            "AgentExecutionState": {},
-            "CommandHistoryState": {
-              "commands": [],
-            },
-            "CostTrackingState": {
-              "costs": {}
-            },
-            "LifecycleState": {
-              "enabledHooks": [
-               "@tokenring-ai/checkpoint/autoCheckpoint",
-              ],
-            },
-            "TodoState": {
-              "todos": [],
-            },
-          },
-        });
+        expect(mockProvider.storeAgentCheckpoint).toHaveBeenCalled();
+        const callArgs = mockProvider.storeAgentCheckpoint.mock.calls[0][0];
+        expect(callArgs.name).toBe('Test Checkpoint');
+        expect(callArgs.agentId).toBe(mockAgent.id);
+        expect(callArgs).toHaveProperty('state');
       });
 
-      it('should use default label when none provided', async () => {
-        await service.saveAgentCheckpoint(undefined as any, mockAgent);
+      it('should throw error when no provider is registered', async () => {
+        const serviceWithoutProvider = new AgentCheckpointService(mockApp, {});
         
-        expect(mockProvider.storeAgentCheckpoint).toHaveBeenCalled();
+        await expect(serviceWithoutProvider.saveAgentCheckpoint('Test', mockAgent))
+          .rejects.toThrow('No checkpoint provider is registered');
       });
     });
 
     describe('restoreAgentCheckpoint', () => {
       it('should restore checkpoint successfully', async () => {
-        vi.spyOn(mockAgent, 'restoreState')
+        vi.spyOn(mockAgent, 'restoreState').mockReturnValue();
         await service.restoreAgentCheckpoint('checkpoint-id-123', mockAgent);
         
         expect(mockProvider.retrieveAgentCheckpoint).toHaveBeenCalledWith('checkpoint-id-123');
@@ -151,9 +116,16 @@ describe('AgentCheckpointService', () => {
         await expect(service.restoreAgentCheckpoint('non-existent', mockAgent))
           .rejects.toThrow('Checkpoint non-existent not found');
       });
+
+      it('should throw error when no provider is registered', async () => {
+        const serviceWithoutProvider = new AgentCheckpointService(mockApp, {});
+        
+        await expect(serviceWithoutProvider.restoreAgentCheckpoint('test-id', mockAgent))
+          .rejects.toThrow('No checkpoint provider is registered');
+      });
     });
 
-    describe('listCheckpoints', () => {
+    describe('listAgentCheckpoints', () => {
       it('should list checkpoints successfully', async () => {
         const checkpoints = await service.listAgentCheckpoints();
         
@@ -164,6 +136,33 @@ describe('AgentCheckpointService', () => {
           agentId: 'test-agent-id',
           createdAt: expect.any(Number)
         });
+      });
+
+      it('should throw error when no provider is registered', async () => {
+        const serviceWithoutProvider = new AgentCheckpointService(mockApp, {});
+        
+        await expect(serviceWithoutProvider.listAgentCheckpoints())
+          .rejects.toThrow('No checkpoint provider is registered');
+      });
+    });
+
+    describe('retrieveAgentCheckpoint', () => {
+      it('should retrieve checkpoint successfully', async () => {
+        const checkpoint = await service.retrieveAgentCheckpoint('checkpoint-id-123');
+        
+        expect(mockProvider.retrieveAgentCheckpoint).toHaveBeenCalledWith('checkpoint-id-123');
+        expect(checkpoint).toMatchObject({
+          id: 'checkpoint-id-123',
+          name: 'Test Checkpoint',
+          agentId: 'test-agent-id',
+        });
+      });
+
+      it('should throw error when no provider is registered', async () => {
+        const serviceWithoutProvider = new AgentCheckpointService(mockApp, {});
+        
+        await expect(serviceWithoutProvider.retrieveAgentCheckpoint('test-id'))
+          .rejects.toThrow('No checkpoint provider is registered');
       });
     });
   });

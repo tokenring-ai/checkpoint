@@ -1,6 +1,8 @@
 import {TokenRingAgentCommand} from '@tokenring-ai/agent/types';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import checkpointCommand from './checkpoint.js';
+import createCheckpointCommand from './agent-checkpoint/create.js';
+import listCheckpointCommand from './agent-checkpoint/list.js';
+import restoreCheckpointCommand from './agent-checkpoint/restore.js';
 
 // Mock Agent
 const mockAgent = {
@@ -23,7 +25,7 @@ const mockAgent = {
 const mockCheckpointService = {
   saveAgentCheckpoint: vi.fn().mockResolvedValue('checkpoint-id-123'),
   restoreAgentCheckpoint: vi.fn().mockResolvedValue(undefined),
-  listCheckpoints: vi.fn().mockResolvedValue([
+  listAgentCheckpoints: vi.fn().mockResolvedValue([
     {
       id: 'checkpoint-1',
       name: 'Test Checkpoint 1',
@@ -39,7 +41,7 @@ const mockCheckpointService = {
   ])
 };
 
-describe('Checkpoint Command', () => {
+describe('Checkpoint Commands', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAgent.requireServiceByType.mockReturnValue(mockCheckpointService);
@@ -49,111 +51,151 @@ describe('Checkpoint Command', () => {
     vi.clearAllMocks();
   });
 
-  describe('Command Configuration', () => {
-    it('should export correct description', () => {
-      expect(checkpointCommand.description).toBe('/agent checkpoint - Create or restore conversation checkpoints to resume chat');
+  describe('Create Command', () => {
+    describe('Command Configuration', () => {
+      it('should export correct description', () => {
+        expect(createCheckpointCommand.description).toBe('Create a conversation checkpoint');
+      });
+
+      it('should implement TokenRingAgentCommand interface', () => {
+        const command: TokenRingAgentCommand = createCheckpointCommand;
+        expect(command.description).toBeDefined();
+        expect(typeof command.execute).toBe('function');
+        expect(command.help).toBeDefined();
+      });
     });
 
-    it('should implement TokenRingAgentCommand interface', () => {
-      const command: TokenRingAgentCommand = checkpointCommand;
-      expect(command.description).toBeDefined();
-      expect(typeof command.execute).toBe('function');
-      expect(command.help).toBeDefined();
-    });
-  });
-
-  describe('Command Execution', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
-      mockAgent.requireServiceByType.mockReturnValue(mockCheckpointService);
-    });
-
-    describe('Create Action', () => {
+    describe('Command Execution', () => {
       it('should create checkpoint with default label', async () => {
-        await checkpointCommand.execute('create', mockAgent);
+        const result = await createCheckpointCommand.execute({remainder: 'New Checkpoint', agent: mockAgent});
         
         expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith('New Checkpoint', mockAgent);
-        expect(mockAgent.infoMessage).toHaveBeenCalledWith('Checkpoint created: checkpoint-id-123: New Checkpoint');
+        expect(result).toBe('Checkpoint created: checkpoint-id-123: New Checkpoint');
       });
 
       it('should create checkpoint with custom label', async () => {
-        await checkpointCommand.execute('create My Custom Label', mockAgent);
+        const result = await createCheckpointCommand.execute({remainder: 'My Custom Label', agent: mockAgent});
         
         expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith('My Custom Label', mockAgent);
-        expect(mockAgent.infoMessage).toHaveBeenCalledWith('Checkpoint created: checkpoint-id-123: My Custom Label');
+        expect(result).toBe('Checkpoint created: checkpoint-id-123: My Custom Label');
       });
 
       it('should create checkpoint with complex label', async () => {
-        await checkpointCommand.execute('create Label with numbers 123 and symbols !@#', mockAgent);
+        const result = await createCheckpointCommand.execute({remainder: 'Label with numbers 123 and symbols !@#', agent: mockAgent});
         
         expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith('Label with numbers 123 and symbols !@#', mockAgent);
+        expect(result).toBe('Checkpoint created: checkpoint-id-123: Label with numbers 123 and symbols !@#');
       });
 
       it('should handle create with multiple words', async () => {
-        await checkpointCommand.execute('create This is a multi word label', mockAgent);
+        const result = await createCheckpointCommand.execute({remainder: 'This is a multi word label', agent: mockAgent});
         
         expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith('This is a multi word label', mockAgent);
+        expect(result).toBe('Checkpoint created: checkpoint-id-123: This is a multi word label');
       });
     });
 
-    describe('Restore Action', () => {
-      it('should restore checkpoint with valid ID', async () => {
-        await checkpointCommand.execute('restore checkpoint-1', mockAgent);
+    describe('Error Handling', () => {
+      it('should handle checkpoint service errors', async () => {
+        const error = new Error('Service error');
+        mockCheckpointService.saveAgentCheckpoint.mockRejectedValueOnce(error);
         
-        expect(mockCheckpointService.restoreAgentCheckpoint).toHaveBeenCalledWith('checkpoint-1', mockAgent);
-        expect(mockAgent.infoMessage).toHaveBeenCalledWith('Checkpoint checkpoint-1 loaded');
+        await expect(createCheckpointCommand.execute({remainder: 'Test', agent: mockAgent})).rejects.toThrow('Service error');
+      });
+    });
+  });
+
+  describe('Restore Command', () => {
+    describe('Command Configuration', () => {
+      it('should export correct description', () => {
+        expect(restoreCheckpointCommand.description).toBe('Restore a checkpoint by ID');
       });
 
-      it('should show error when no ID provided', async () => {
-        await checkpointCommand.execute('restore', mockAgent);
+      it('should implement TokenRingAgentCommand interface', () => {
+        const command: TokenRingAgentCommand = restoreCheckpointCommand;
+        expect(command.description).toBeDefined();
+        expect(typeof command.execute).toBe('function');
+        expect(command.help).toBeDefined();
+      });
+    });
+
+    describe('Command Execution', () => {
+      it('should restore checkpoint with valid ID', async () => {
+        const result = await restoreCheckpointCommand.execute({positionals: {checkpointId: 'checkpoint-1'}, agent: mockAgent});
         
-        expect(mockAgent.errorMessage).toHaveBeenCalledWith('Usage: /agent checkpoint restore <id> (see /agent checkpoint list for ids)');
-        expect(mockCheckpointService.restoreAgentCheckpoint).not.toHaveBeenCalled();
+        expect(mockCheckpointService.restoreAgentCheckpoint).toHaveBeenCalledWith('checkpoint-1', mockAgent);
+        expect(result).toBe('Checkpoint checkpoint-1 loaded');
       });
 
       it('should handle restore with complex ID', async () => {
-        await checkpointCommand.execute('restore complex-id-with-dashes-123', mockAgent);
+        const result = await restoreCheckpointCommand.execute({positionals: {checkpointId: 'complex-id-with-dashes-123'}, agent: mockAgent});
         
         expect(mockCheckpointService.restoreAgentCheckpoint).toHaveBeenCalledWith('complex-id-with-dashes-123', mockAgent);
+        expect(result).toBe('Checkpoint complex-id-with-dashes-123 loaded');
       });
     });
 
-    describe('List Action (Default)', () => {
-      beforeEach(() => {
-        // Mock askQuestion for tree selection
-        mockAgent.askQuestion.mockResolvedValue('checkpoint-1');
+    describe('Error Handling', () => {
+      it('should handle restore errors', async () => {
+        const error = new Error('Restore failed');
+        mockCheckpointService.restoreAgentCheckpoint.mockRejectedValueOnce(error);
+        
+        await expect(restoreCheckpointCommand.execute({positionals: {checkpointId: 'invalid-id'}, agent: mockAgent})).rejects.toThrow('Restore failed');
+      });
+    });
+  });
+
+  describe('List Command', () => {
+    describe('Command Configuration', () => {
+      it('should export correct description', () => {
+        expect(listCheckpointCommand.description).toBe('Interactive checkpoint browser');
       });
 
-      it('should list checkpoints when none provided', async () => {
-        await checkpointCommand.execute('list', mockAgent);
+      it('should implement TokenRingAgentCommand interface', () => {
+        const command: TokenRingAgentCommand = listCheckpointCommand;
+        expect(command.description).toBeDefined();
+        expect(typeof command.execute).toBe('function');
+        expect(command.help).toBeDefined();
+      });
+    });
+
+    describe('Command Execution', () => {
+      beforeEach(() => {
+        // Mock askQuestion for tree selection
+        mockAgent.askQuestion.mockResolvedValue(['checkpoint-1']);
+      });
+
+      it('should list checkpoints', async () => {
+        const result = await listCheckpointCommand.execute({agent: mockAgent});
         
-        expect(mockCheckpointService.listCheckpoints).toHaveBeenCalled();
+        expect(mockCheckpointService.listAgentCheckpoints).toHaveBeenCalled();
+        expect(result).toBe('Checkpoint checkpoint-1 loaded');
       });
 
       it('should handle empty checkpoint list', async () => {
-        mockCheckpointService.listCheckpoints.mockResolvedValueOnce([]);
+        mockCheckpointService.listAgentCheckpoints.mockResolvedValueOnce([]);
         
-        await checkpointCommand.execute('list', mockAgent);
+        const result = await listCheckpointCommand.execute({agent: mockAgent});
         
-        expect(mockAgent.infoMessage).toHaveBeenCalledWith('No checkpoints saved. Use /agent checkpoint create to make one.');
+        expect(result).toBe('No checkpoints saved. Use /agent checkpoint create to make one.');
+        expect(mockCheckpointService.restoreAgentCheckpoint).not.toHaveBeenCalled();
       });
-
 
       it('should restore selected checkpoint from list', async () => {
         mockAgent.askQuestion.mockResolvedValue(['checkpoint-1']);
         
-        await checkpointCommand.execute('list', mockAgent);
+        const result = await listCheckpointCommand.execute({agent: mockAgent});
         
         expect(mockCheckpointService.restoreAgentCheckpoint).toHaveBeenCalledWith('checkpoint-1', mockAgent);
-        expect(mockAgent.infoMessage).toHaveBeenCalledWith('Checkpoint checkpoint-1 loaded');
+        expect(result).toBe('Checkpoint checkpoint-1 loaded');
       });
 
       it('should handle cancellation of tree selection', async () => {
         mockAgent.askQuestion.mockResolvedValue(null);
         
-        await checkpointCommand.execute('list', mockAgent);
+        const result = await listCheckpointCommand.execute({agent: mockAgent});
         
-        expect(mockAgent.infoMessage).toHaveBeenCalledWith('Checkpoint selection cancelled. No changes made.');
+        expect(result).toBe('Checkpoint selection cancelled. No changes made.');
         expect(mockCheckpointService.restoreAgentCheckpoint).not.toHaveBeenCalled();
       });
 
@@ -161,77 +203,41 @@ describe('Checkpoint Command', () => {
         const error = new Error('Tree selection failed');
         mockAgent.askQuestion.mockRejectedValueOnce(error);
         
-        await checkpointCommand.execute('list', mockAgent);
+        await expect(listCheckpointCommand.execute({agent: mockAgent})).rejects.toThrow('Error during checkpoint selection: Error: Tree selection failed');
+      });
+    });
+
+    describe('Error Handling', () => {
+      it('should handle list errors', async () => {
+        const error = new Error('List failed');
+        mockCheckpointService.listAgentCheckpoints.mockRejectedValueOnce(error);
         
-        expect(mockAgent.errorMessage).toHaveBeenCalledWith('Error during checkpoint selection: Error: Tree selection failed');
+        await expect(listCheckpointCommand.execute({agent: mockAgent})).rejects.toThrow('List failed');
       });
     });
   });
 
-  describe('Error Handling', () => {
-    it('should handle checkpoint service errors', async () => {
-      const error = new Error('Service error');
-      mockCheckpointService.saveAgentCheckpoint.mockRejectedValueOnce(error);
-      
-      await expect(checkpointCommand.execute('create Test', mockAgent)).rejects.toThrow('Service error');
-    });
-
-    it('should handle restore errors', async () => {
-      const error = new Error('Restore failed');
-      mockCheckpointService.restoreAgentCheckpoint.mockRejectedValueOnce(error);
-      
-      await expect(checkpointCommand.execute('restore invalid-id', mockAgent)).rejects.toThrow('Restore failed');
-    });
-
-    it('should handle list errors', async () => {
-      const error = new Error('List failed');
-      mockCheckpointService.listCheckpoints.mockRejectedValueOnce(error);
-      
-      await expect(checkpointCommand.execute('list', mockAgent)).rejects.toThrow('List failed');
-    });
-  });
-
-  describe('Command Parsing', () => {
-    it('should parse create command correctly', () => {
-      expect(checkpointCommand.execute).toBeDefined();
-    });
-
-    it('should handle various input formats', async () => {
-      const testCases = [
-        'create',
-        'create ',
-        'create Label',
-        'create Multiple Word Label',
-        'restore id',
-        'restore complex-id',
-        '',
-        'invalid'
-      ];
-
-      for (const input of testCases) {
-        vi.clearAllMocks();
-        await checkpointCommand.execute(input, mockAgent);
-      }
-    });
-
-    it('should handle whitespace correctly', async () => {
-      await checkpointCommand.execute('create  test  label  ', mockAgent);
-      
-      expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith('test  label', mockAgent);
-    });
-  });
-
-
   describe('Help Documentation', () => {
-    it('should provide comprehensive help', () => {
-      const help = checkpointCommand.help;
+    it('create command should provide comprehensive help', () => {
+      const help = createCheckpointCommand.help;
 
-      expect(help).toContain('Create or restore conversation checkpoints');
-      expect(help).toContain('create [label]');
-      expect(help).toContain('restore <id>');
-      expect(help).toContain('list');
-      expect(help).toContain('Examples');
-      expect(help).toContain('Tips');
+      expect(help).toContain('Create a checkpoint of the current conversation state');
+      expect(help).toContain('/agent checkpoint create');
+      expect(help).toContain('/agent checkpoint create My Fix');
+    });
+
+    it('restore command should provide comprehensive help', () => {
+      const help = restoreCheckpointCommand.help;
+
+      expect(help).toContain('Restore a specific checkpoint by its ID');
+      expect(help).toContain('/agent checkpoint restore abc123');
+    });
+
+    it('list command should provide comprehensive help', () => {
+      const help = listCheckpointCommand.help;
+
+      expect(help).toContain('Open an interactive tree browser to select and restore a checkpoint');
+      expect(help).toContain('/agent checkpoint list');
     });
   });
 });

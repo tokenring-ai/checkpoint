@@ -1,4 +1,5 @@
-import type {HookSubscription} from '@tokenring-ai/agent/types';
+import type {HookSubscription} from '@tokenring-ai/lifecycle/types';
+import {AfterAgentInputHandled, HookCallback} from '@tokenring-ai/lifecycle/util/hooks';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import AgentCheckpointService from '../AgentCheckpointService.js';
 import autoCheckpointHook from './autoCheckpoint.js';
@@ -43,38 +44,41 @@ describe('Auto-Checkpoint Hook', () => {
       expect(autoCheckpointHook.description).toBe('Automatically saves agent checkpoints after input is handled');
     });
 
-    it('should implement HookConfig interface', () => {
+    it('should implement HookSubscription interface', () => {
       const hook: HookSubscription = autoCheckpointHook;
       expect(hook.name).toBeDefined();
       expect(hook.description).toBeDefined();
-      expect(typeof hook.afterAgentInputComplete).toBe('function');
-      expect(typeof hook.beforeChatCompletion).toBe('function');
+      expect(hook.callbacks).toBeDefined();
+      expect(Array.isArray(hook.callbacks)).toBe(true);
+    });
+
+    it('should have AfterAgentInputHandled hook', () => {
+      const afterInputHook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      expect(afterInputHook).toBeDefined();
+      expect(typeof afterInputHook?.callback).toBe('function');
     });
   });
 
   describe('Hook Execution', () => {
-    it('should save checkpoint after agent input complete', async () => {
+    it('should save checkpoint after agent input handled', async () => {
       const message = 'Test message';
       
-      await autoCheckpointHook.afterAgentInputComplete(mockAgent, message);
+      // Find and execute the AfterAgentInputHandled callback
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      expect(hook).toBeDefined();
       
-      expect(mockAgent.getServiceByType).toHaveBeenCalledWith(AgentCheckpointService);
-      expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith(message, mockAgent);
-    });
-
-    it('should save checkpoint before chat completion', async () => {
-      const message = 'Test message';
+      const requestData = new AfterAgentInputHandled({input: {message}} as any, {} as any);
+      await hook?.callback(requestData, mockAgent);
       
-      await autoCheckpointHook.beforeChatCompletion(mockAgent, message);
-      
-      expect(mockAgent.getServiceByType).toHaveBeenCalledWith(AgentCheckpointService);
       expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith(message, mockAgent);
     });
 
     it('should use message as checkpoint name', async () => {
       const message = 'Custom checkpoint name';
       
-      await autoCheckpointHook.afterAgentInputComplete(mockAgent, message);
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      const requestData = new AfterAgentInputHandled({input: {message}} as any, {} as any);
+      await hook?.callback(requestData, mockAgent);
       
       expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith(
         'Custom checkpoint name',
@@ -85,7 +89,9 @@ describe('Auto-Checkpoint Hook', () => {
     it('should handle empty message', async () => {
       const message = '';
       
-      await autoCheckpointHook.afterAgentInputComplete(mockAgent, message);
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      const requestData = new AfterAgentInputHandled({input: {message}} as any, {} as any);
+      await hook?.callback(requestData, mockAgent);
       
       expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith(
         '',
@@ -100,8 +106,11 @@ describe('Auto-Checkpoint Hook', () => {
       
       const message = 'Test message';
       
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      const requestData = new AfterAgentInputHandled({input: {message}} as any, {} as any);
+      
       // Should not throw error, but should not save checkpoint
-      await autoCheckpointHook.afterAgentInputComplete(mockAgent, message);
+      await hook?.callback(requestData, mockAgent);
       
       expect(mockCheckpointService.saveAgentCheckpoint).not.toHaveBeenCalled();
     });
@@ -112,9 +121,12 @@ describe('Auto-Checkpoint Hook', () => {
       
       const message = 'Test message';
       
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      const requestData = new AfterAgentInputHandled({input: {message}} as any, {} as any);
+      
       // The hook should let the error propagate
       await expect(
-        autoCheckpointHook.afterAgentInputComplete(mockAgent, message)
+        hook?.callback(requestData, mockAgent)
       ).rejects.toThrow('Service error');
     });
 
@@ -126,8 +138,11 @@ describe('Auto-Checkpoint Hook', () => {
       
       const message = 'Test message';
       
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      const requestData = new AfterAgentInputHandled({input: {message}} as any, {} as any);
+      
       await expect(
-        autoCheckpointHook.afterAgentInputComplete(mockAgent, message)
+        hook?.callback(requestData, mockAgent)
       ).rejects.toThrow('Service not initialized');
     });
   });
@@ -141,9 +156,10 @@ describe('Auto-Checkpoint Hook', () => {
     it('should call correct service methods', async () => {
       const message = 'Integration test message';
       
-      await autoCheckpointHook.afterAgentInputComplete(mockAgent, message);
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      const requestData = new AfterAgentInputHandled({input: {message}} as any, {} as any);
+      await hook?.callback(requestData, mockAgent);
       
-      expect(mockAgent.getServiceByType).toHaveBeenCalledWith(AgentCheckpointService);
       expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith(
         message,
         mockAgent
@@ -154,40 +170,14 @@ describe('Auto-Checkpoint Hook', () => {
       const message = 'Parameter test message';
       const expectedCheckpointName = 'Parameter test message';
       
-      await autoCheckpointHook.afterAgentInputComplete(mockAgent, message);
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      const requestData = new AfterAgentInputHandled({input: {message}} as any, {} as any);
+      await hook?.callback(requestData, mockAgent);
       
       expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith(
         expectedCheckpointName,
         mockAgent
       );
-    });
-  });
-
-  describe('Hook Timing', () => {
-    it('should be triggered after agent input completion', async () => {
-      const message = 'Timing test message';
-      
-      // Test afterAgentInputComplete hook
-      await autoCheckpointHook.afterAgentInputComplete(mockAgent, message);
-      expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledTimes(1);
-    });
-
-    it('should be triggered before chat completion', async () => {
-      const message = 'Timing test message';
-      
-      // Test beforeChatCompletion hook
-      await autoCheckpointHook.beforeChatCompletion(mockAgent, message);
-      expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledTimes(1);
-    });
-
-    it('should work with both hook points', async () => {
-      const message = 'Dual hook test message';
-      
-      // Test both hooks
-      await autoCheckpointHook.afterAgentInputComplete(mockAgent, message);
-      await autoCheckpointHook.beforeChatCompletion(mockAgent, message);
-      
-      expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -202,9 +192,12 @@ describe('Auto-Checkpoint Hook', () => {
         ''
       ];
 
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      
       for (const message of messages) {
         vi.clearAllMocks();
-        await autoCheckpointHook.afterAgentInputComplete(mockAgent, message);
+        const requestData = new AfterAgentInputHandled({input: {message}} as any, {} as any);
+        await hook?.callback(requestData, mockAgent);
         expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith(message, mockAgent);
       }
     });
@@ -212,7 +205,9 @@ describe('Auto-Checkpoint Hook', () => {
     it('should handle long messages', async () => {
       const longMessage = 'a'.repeat(1000);
       
-      await autoCheckpointHook.afterAgentInputComplete(mockAgent, longMessage);
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      const requestData = new AfterAgentInputHandled({input: {message: longMessage}} as any, {} as any);
+      await hook?.callback(requestData, mockAgent);
       
       expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith(longMessage, mockAgent);
     });
@@ -220,7 +215,9 @@ describe('Auto-Checkpoint Hook', () => {
     it('should handle messages with special characters', async () => {
       const specialMessage = 'Message with "quotes" and \'apostrophes\' and \\backslashes\\';
       
-      await autoCheckpointHook.afterAgentInputComplete(mockAgent, specialMessage);
+      const hook = autoCheckpointHook.callbacks.find(cb => cb.hookConstructor === AfterAgentInputHandled);
+      const requestData = new AfterAgentInputHandled({input: {message: specialMessage}} as any, {} as any);
+      await hook?.callback(requestData, mockAgent);
       
       expect(mockCheckpointService.saveAgentCheckpoint).toHaveBeenCalledWith(specialMessage, mockAgent);
     });
