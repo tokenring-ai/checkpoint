@@ -1,7 +1,7 @@
 {
   "name": "@tokenring-ai/checkpoint",
   "version": "0.2.0",
-  "description": "Checkpoint service for storing Agent Checkpoints with a storage provider",
+  "description": "Checkpoint service for storing Agent and App Checkpoints with a storage provider",
   "dependencies": {
     "@tokenring-ai/app": "0.2.0",
     "@tokenring-ai/chat": "0.2.0",
@@ -24,8 +24,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.1"
   },
   "type": "module"
 }

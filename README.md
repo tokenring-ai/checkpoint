@@ -14,6 +14,7 @@ The `@tokenring-ai/checkpoint` package provides persistent state management for 
 - **Named Checkpoints**: Label checkpoints for easy identification
 - **RPC API**: JSON-RPC endpoints for remote checkpoint operations
 - **Plugin Architecture**: Automatic integration with TokenRing applications
+- **State Management**: Integrates with app state management for session recovery
 
 ## Installation
 
@@ -50,17 +51,27 @@ The package uses the `CheckpointConfigSchema` which defines configuration for bo
 import {CheckpointConfigSchema} from '@tokenring-ai/checkpoint';
 
 // Schema structure:
-// {
-//   app: {
-//     restorePreviousState: boolean  // Default: false
-//   },
-//   agent: {}  // Currently empty configuration
+// CheckpointConfigSchema = {
+//   app: AppCheckpointServiceSchema,
+//   agent: AgentCheckpointServiceSchema
 // }
+
+// AppCheckpointServiceSchema:
+// {
+//   restorePreviousState: boolean (default: false)
+//   projectDirectory: string
+//   hostname: string (default: current hostname)
+// }
+
+// AgentCheckpointServiceSchema:
+// {} (empty configuration)
 
 // Schema validation example
 const validConfig = CheckpointConfigSchema.parse({
   app: {
-    restorePreviousState: true
+    restorePreviousState: true,
+    projectDirectory: '/path/to/project',
+    hostname: 'localhost'
   },
   agent: {}
 });
@@ -77,6 +88,7 @@ Main service for agent checkpoint operations. Automatically installed when the p
 - `name`: "AgentCheckpointService"
 - `description`: "Persists agent state to a storage provider"
 - `checkpointProvider`: The registered storage provider (nullable)
+- `options`: Configuration options from schema
 
 **Key Methods:**
 
@@ -85,8 +97,8 @@ Main service for agent checkpoint operations. Automatically installed when the p
 - `restoreAgentCheckpoint(id, agent)` - Restore agent from checkpoint
 - `listAgentCheckpoints()` - List all available checkpoints
 - `retrieveAgentCheckpoint(id)` - Retrieve a specific checkpoint with full state
-- `attach(agent, creationContext)` - Attach service to an agent and enable auto-checkpoint hook
-- `start()` - Initialize and validate checkpoint provider
+- `attach(agent, creationContext)` - Attach service to an agent and add checkpoint provider info to creation context
+- `start()` - Initialize and validate checkpoint provider is registered
 
 **Example:**
 
@@ -94,6 +106,9 @@ Main service for agent checkpoint operations. Automatically installed when the p
 import AgentCheckpointService from '@tokenring-ai/checkpoint/AgentCheckpointService';
 
 const checkpointService = agent.requireServiceByType(AgentCheckpointService);
+
+// Set checkpoint provider
+checkpointService.setCheckpointProvider(myProvider);
 
 // Save checkpoint
 const checkpointId = await checkpointService.saveAgentCheckpoint(
@@ -120,6 +135,7 @@ Service for application-level checkpoint operations. Manages app state persisten
 - `name`: "AppCheckpointService"
 - `description`: "Persists app state to a storage provider"
 - `checkpointProvider`: The registered storage provider (nullable)
+- `options`: Configuration options from schema
 
 **Key Methods:**
 
@@ -138,6 +154,9 @@ Service for application-level checkpoint operations. Manages app state persisten
 import AppCheckpointService from '@tokenring-ai/checkpoint/AppCheckpointService';
 
 const appCheckpointService = app.requireServiceByType(AppCheckpointService);
+
+// Set checkpoint provider
+appCheckpointService.setCheckpointProvider(myProvider);
 
 // Save app checkpoint
 const checkpointId = await appCheckpointService.saveAppCheckpoint();
