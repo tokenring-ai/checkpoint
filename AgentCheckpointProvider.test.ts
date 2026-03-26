@@ -1,5 +1,5 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import type {AgentCheckpointListItem, AgentCheckpointStorage, NamedAgentCheckpoint, StoredAgentCheckpoint} from './AgentCheckpointStorage.js';
+import type {AgentCheckpointListItem, AgentCheckpointStorage, NamedAgentCheckpoint, StoredAgentCheckpoint} from './AgentCheckpointStorage.ts';
 
 describe('AgentCheckpointProvider Interface', () => {
   let provider: AgentCheckpointStorage & {

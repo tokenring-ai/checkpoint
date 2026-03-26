@@ -1,8 +1,8 @@
 import {TokenRingAgentCommand} from '@tokenring-ai/agent/types';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import createCheckpointCommand from './agent-checkpoint/create.js';
-import listCheckpointCommand from './agent-checkpoint/list.js';
-import restoreCheckpointCommand from './agent-checkpoint/restore.js';
+import createCheckpointCommand from './agent-checkpoint/create.ts';
+import listCheckpointCommand from './agent-checkpoint/list.ts';
+import restoreCheckpointCommand from './agent-checkpoint/restore.ts';
 
 // Mock Agent
 const mockAgent = {

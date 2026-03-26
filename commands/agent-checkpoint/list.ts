@@ -32,9 +32,10 @@ async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Prom
       message: "Select a checkpoint to restore:",
       question: { type: 'treeSelect', label: "Select Checkpoint", key: "result", minimumSelections: 1, maximumSelections: 1, tree },
     });
-    if (selection == null) return "Checkpoint selection cancelled. No changes made.";
-    await checkpointService.restoreAgentCheckpoint(selection[0], agent);
-    return `Checkpoint ${selection[0]} loaded`;
+    if (selection == null || selection.length === 0) return "Checkpoint selection cancelled. No changes made.";
+    const selectedCheckpoint = selection[0];
+    await checkpointService.restoreAgentCheckpoint(selectedCheckpoint, agent);
+    return `Checkpoint ${selectedCheckpoint} loaded`;
   } catch (error) {
     throw new CommandFailedError(`Error during checkpoint selection: ${error}`);
   }

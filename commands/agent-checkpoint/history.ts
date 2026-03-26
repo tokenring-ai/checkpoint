@@ -2,8 +2,8 @@ import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import indent from "@tokenring-ai/utility/string/indent";
-import AgentCheckpointService from "../../AgentCheckpointService.js";
-import type {AgentCheckpointListItem} from "../../AgentCheckpointStorage.js";
+import AgentCheckpointService from "../../AgentCheckpointService.ts";
+import type {AgentCheckpointListItem} from "../../AgentCheckpointStorage.ts";
 
 function groupCheckpointsByAgent(checkpoints: AgentCheckpointListItem[]): Record<string, AgentCheckpointListItem[]> {
   const grouped: Record<string, AgentCheckpointListItem[]> = {};

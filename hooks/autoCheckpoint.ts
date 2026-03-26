@@ -1,6 +1,6 @@
 import type {HookSubscription} from "@tokenring-ai/lifecycle/types";
 import {AfterAgentInputHandled, HookCallback} from "@tokenring-ai/lifecycle/util/hooks";
-import AgentCheckpointService from "../AgentCheckpointService.js";
+import AgentCheckpointService from "../AgentCheckpointService.ts";
 
 const name = "autoCheckpoint";
 const displayName = "Checkpoint/Auto Checkpoint";

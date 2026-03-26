@@ -2,8 +2,8 @@ import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import indent from "@tokenring-ai/utility/string/indent";
-import AppCheckpointService from "../../AppCheckpointService.js";
-import type {AppSessionListItem} from "../../AppCheckpointStorage.js";
+import AppCheckpointService from "../../AppCheckpointService.ts";
+import type {AppSessionListItem} from "../../AppCheckpointStorage.ts";
 
 function groupCheckpointsByDate(checkpoints: AppSessionListItem[]): Record<string, AppSessionListItem[]> {
   const grouped: Record<string, AppSessionListItem[]> = {};

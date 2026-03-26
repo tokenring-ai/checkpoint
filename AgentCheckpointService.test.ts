@@ -2,8 +2,8 @@ import createTestingAgent from "@tokenring-ai/agent/test/createTestingAgent";
 import createTestingApp from "@tokenring-ai/app/test/createTestingApp";
 import {Agent} from '@tokenring-ai/agent';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import AgentCheckpointService from './AgentCheckpointService.js';
-import type {AgentCheckpointStorage} from './AgentCheckpointStorage.js';
+import AgentCheckpointService from './AgentCheckpointService.ts';
+import type {AgentCheckpointStorage} from './AgentCheckpointStorage.ts';
 
 // Mock provider
 const mockProvider: AgentCheckpointStorage = {

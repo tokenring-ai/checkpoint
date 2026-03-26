@@ -1,8 +1,8 @@
 import type {HookSubscription} from '@tokenring-ai/lifecycle/types';
 import {AfterAgentInputHandled, HookCallback} from '@tokenring-ai/lifecycle/util/hooks';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import AgentCheckpointService from '../AgentCheckpointService.js';
-import autoCheckpointHook from './autoCheckpoint.js';
+import AgentCheckpointService from '../AgentCheckpointService.ts';
+import autoCheckpointHook from './autoCheckpoint.ts';
 
 // Mock Agent
 const mockAgent = {
