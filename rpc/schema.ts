@@ -1,4 +1,4 @@
-import {RPCSchema} from "@tokenring-ai/rpc/types";
+import type {RPCSchema} from "@tokenring-ai/rpc/types";
 import {z} from "zod";
 
 export default {
@@ -8,25 +8,29 @@ export default {
     listCheckpoints: {
       type: "query",
       input: z.object({}),
-      result: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        agentId: z.string(),
-        createdAt: z.number(),
-      }))
+      result: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          agentId: z.string(),
+          createdAt: z.number(),
+        }),
+      ),
     },
     getCheckpoint: {
       type: "query",
       input: z.object({
-        id: z.string()
-      }),
-      result: z.object({
         id: z.string(),
-        name: z.string(),
-        agentId: z.string(),
-        createdAt: z.number(),
-        state: z.any(),
-      }).nullable()
+      }),
+      result: z
+        .object({
+          id: z.string(),
+          name: z.string(),
+          agentId: z.string(),
+          createdAt: z.number(),
+          state: z.any(),
+        })
+        .nullable(),
     },
     launchAgentFromCheckpoint: {
       type: "mutation",
@@ -38,7 +42,7 @@ export default {
         agentId: z.string(),
         agentName: z.string(),
         agentType: z.string().optional(),
-      })
-    }
-  }
+      }),
+    },
+  },
 } satisfies RPCSchema;

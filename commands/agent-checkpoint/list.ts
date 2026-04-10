@@ -1,16 +1,19 @@
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import type {TreeLeaf} from "@tokenring-ai/agent/question";
-import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand,} from "@tokenring-ai/agent/types";
 import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
 const inputSchema = {
-  args: {}
+  args: {},
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({
+                         agent,
+                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointService = agent.requireServiceByType(AgentCheckpointService);
   const savedCheckpoints = await checkpointService.listAgentCheckpoints();
-  if (savedCheckpoints.length === 0) return "No checkpoints saved. Use /agent checkpoint create to make one.";
+  if (savedCheckpoints.length === 0)
+    return "No checkpoints saved. Use /agent checkpoint create to make one.";
 
   const grouped: Record<string, typeof savedCheckpoints> = {};
   for (const cp of savedCheckpoints) {
@@ -20,19 +23,30 @@ async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Prom
 
   const tree: TreeLeaf[] = Object.keys(grouped)
     .sort((a, b) => b.localeCompare(a))
-    .map(date => ({
+    .map((date) => ({
       name: `📅 ${date} (${grouped[date].length} checkpoints)`,
       children: grouped[date]
         .sort((a, b) => b.createdAt - a.createdAt)
-        .map(cp => ({ name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - ${cp.name}`, value: cp.id })),
+        .map((cp) => ({
+          name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - ${cp.name}`,
+          value: cp.id,
+        })),
     }));
 
   try {
     const selection = await agent.askQuestion({
       message: "Select a checkpoint to restore:",
-      question: { type: 'treeSelect', label: "Select Checkpoint", key: "result", minimumSelections: 1, maximumSelections: 1, tree },
+      question: {
+        type: "treeSelect",
+        label: "Select Checkpoint",
+        key: "result",
+        minimumSelections: 1,
+        maximumSelections: 1,
+        tree,
+      },
     });
-    if (selection == null || selection.length === 0) return "Checkpoint selection cancelled. No changes made.";
+    if (selection == null || selection.length === 0)
+      return "Checkpoint selection cancelled. No changes made.";
     const selectedCheckpoint = selection[0];
     await checkpointService.restoreAgentCheckpoint(selectedCheckpoint, agent);
     return `Checkpoint ${selectedCheckpoint} loaded`;

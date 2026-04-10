@@ -1,8 +1,8 @@
 import {AgentManager} from "@tokenring-ai/agent";
 import type TokenRingApp from "@tokenring-ai/app";
-import {TokenRingService} from "@tokenring-ai/app/types";
+import type {TokenRingService} from "@tokenring-ai/app/types";
 import type {AppCheckpointStorage} from "./AppCheckpointStorage.ts";
-import {type ParsedAppCheckpointConfig} from "./schema.ts";
+import type {ParsedAppCheckpointConfig} from "./schema.ts";
 import {AppCheckpointState} from "./state/appCheckpointState.ts";
 
 export default class AppCheckpointService implements TokenRingService {
@@ -10,19 +10,27 @@ export default class AppCheckpointService implements TokenRingService {
   description = "Persists app state to a storage provider";
 
   checkpointProvider: AppCheckpointStorage | null = null;
-  constructor(readonly app: TokenRingApp, readonly options: ParsedAppCheckpointConfig) {
+
+  constructor(
+    readonly app: TokenRingApp,
+    readonly options: ParsedAppCheckpointConfig,
+  ) {
     const agentManager = this.app.requireService(AgentManager);
-    this.app.stateManager.initializeState(AppCheckpointState, agentManager)
+    this.app.stateManager.initializeState(AppCheckpointState, agentManager);
   }
 
   async start(): Promise<void> {
     if (this.checkpointProvider && this.options.restorePreviousState) {
-      const checkpoint = await this.checkpointProvider.retrieveLatestAppCheckpoint();
+      const checkpoint =
+        await this.checkpointProvider.retrieveLatestAppCheckpoint();
       if (checkpoint) {
         this.app.restoreState(checkpoint.state);
       }
     } else {
-      this.app.serviceError(this,`No CheckpointProvider was registered, unable to save or restore app checkpoints`);
+      this.app.serviceError(
+        this,
+        `No CheckpointProvider was registered, unable to save or restore app checkpoints`,
+      );
     }
   }
 
@@ -46,7 +54,7 @@ export default class AppCheckpointService implements TokenRingService {
       hostname: this.options.hostname,
       projectDirectory: this.options.projectDirectory,
       state: this.app.generateStateCheckpoint(),
-    })
+    });
   }
 
   async restoreAppCheckpoint(id: string): Promise<void> {

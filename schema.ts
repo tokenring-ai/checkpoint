@@ -1,4 +1,4 @@
-import {hostname} from "os";
+import {hostname} from "node:os";
 import {z} from "zod";
 
 export const AppCheckpointServiceSchema = z.object({
@@ -7,12 +7,15 @@ export const AppCheckpointServiceSchema = z.object({
   hostname: z.string().default(hostname()),
 });
 
-export type ParsedAppCheckpointConfig = z.output<typeof AppCheckpointServiceSchema>;
+export type ParsedAppCheckpointConfig = z.output<
+  typeof AppCheckpointServiceSchema
+>;
 
-export const AgentCheckpointServiceSchema = z.object({
-}).prefault({});
+export const AgentCheckpointServiceSchema = z.object({}).prefault({});
 
-export type ParsedAgentCheckpointConfig = z.output<typeof AgentCheckpointServiceSchema>;
+export type ParsedAgentCheckpointConfig = z.output<
+  typeof AgentCheckpointServiceSchema
+>;
 
 export const CheckpointConfigSchema = z.object({
   app: AppCheckpointServiceSchema,

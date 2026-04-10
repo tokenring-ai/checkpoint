@@ -1,4 +1,4 @@
-import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand,} from "@tokenring-ai/agent/types";
 import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
 const inputSchema = {
@@ -9,11 +9,16 @@ const inputSchema = {
       description: "The checkpoint ID to restore",
       required: true,
     },
-  ]
+  ],
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({positionals: {checkpointId}, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  await agent.requireServiceByType(AgentCheckpointService).restoreAgentCheckpoint(checkpointId, agent);
+async function execute({
+                         positionals: {checkpointId},
+                         agent,
+                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  await agent
+    .requireServiceByType(AgentCheckpointService)
+    .restoreAgentCheckpoint(checkpointId, agent);
   return `Checkpoint ${checkpointId} loaded`;
 }
 

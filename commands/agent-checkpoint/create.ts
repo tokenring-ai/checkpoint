@@ -1,14 +1,23 @@
-import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand,} from "@tokenring-ai/agent/types";
 import AgentCheckpointService from "../../AgentCheckpointService.ts";
 
 const inputSchema = {
   args: {},
-  remainder: {name: "label", description: "Optional checkpoint label", defaultValue: "New Checkpoint"}
+  remainder: {
+    name: "label",
+    description: "Optional checkpoint label",
+    defaultValue: "New Checkpoint",
+  },
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({remainder, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({
+                         remainder,
+                         agent,
+                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const label = remainder;
-  const checkpointId = await agent.requireServiceByType(AgentCheckpointService).saveAgentCheckpoint(label, agent);
+  const checkpointId = await agent
+    .requireServiceByType(AgentCheckpointService)
+    .saveAgentCheckpoint(label, agent);
   return `Checkpoint created: ${checkpointId}: ${label}`;
 }
 

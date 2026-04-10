@@ -1,5 +1,5 @@
 import {AgentCommandService} from "@tokenring-ai/agent";
-import {TokenRingPlugin} from "@tokenring-ai/app";
+import type {TokenRingPlugin} from "@tokenring-ai/app";
 import {AgentLifecycleService} from "@tokenring-ai/lifecycle";
 import {RpcService} from "@tokenring-ai/rpc";
 
@@ -13,7 +13,7 @@ import checkpointRPC from "./rpc/checkpoint.ts";
 import {CheckpointConfigSchema} from "./schema.ts";
 
 const packageConfigSchema = z.object({
-  checkpoint: CheckpointConfigSchema
+  checkpoint: CheckpointConfigSchema,
 });
 
 export default {
@@ -22,21 +22,27 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    const agentCheckpointService = new AgentCheckpointService(app, config.checkpoint.agent);
+    const agentCheckpointService = new AgentCheckpointService(
+      app,
+      config.checkpoint.agent,
+    );
     app.addServices(agentCheckpointService);
 
-    const appCheckpointService = new AppCheckpointService(app, config.checkpoint.app);
+    const appCheckpointService = new AppCheckpointService(
+      app,
+      config.checkpoint.app,
+    );
     app.addServices(appCheckpointService);
 
-    app.waitForService(AgentCommandService, agentCommandService =>
-      agentCommandService.addAgentCommands(agentCommands)
+    app.waitForService(AgentCommandService, (agentCommandService) =>
+      agentCommandService.addAgentCommands(agentCommands),
     );
-    app.waitForService(AgentLifecycleService, lifecycleService =>
-      lifecycleService.addHooks(hooks)
+    app.waitForService(AgentLifecycleService, (lifecycleService) =>
+      lifecycleService.addHooks(hooks),
     );
-    app.waitForService(RpcService, rpcService => {
+    app.waitForService(RpcService, (rpcService) => {
       rpcService.registerEndpoint(checkpointRPC);
     });
   },
-  config: packageConfigSchema
+  config: packageConfigSchema,
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;
