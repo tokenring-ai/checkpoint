@@ -26,7 +26,7 @@ export default createRPCEndpoint(CheckpointRpcSchema, {
       throw new Error(`Checkpoint ${args.checkpointId} not found`);
     }
 
-    const agent = await agentManager.spawnAgentFromCheckpoint(checkpoint, {
+    const agent = agentManager.spawnAgentFromCheckpoint(checkpoint, {
       headless: args.headless,
     });
 

@@ -50,8 +50,8 @@ async function execute({
     const selectedCheckpoint = selection[0];
     await checkpointService.restoreAgentCheckpoint(selectedCheckpoint, agent);
     return `Checkpoint ${selectedCheckpoint} loaded`;
-  } catch (error) {
-    throw new CommandFailedError(`Error during checkpoint selection: ${error}`);
+  } catch (error: unknown) {
+    throw new CommandFailedError("Error during checkpoint selection", { cause: error });
   }
 }
 

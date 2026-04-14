@@ -48,8 +48,8 @@ async function execute({
       return "Checkpoint selection cancelled. No changes made.";
     await checkpointService.restoreAppCheckpoint(selection[0]);
     return `Checkpoint ${selection[0]} loaded`;
-  } catch (error) {
-    throw new CommandFailedError(`Error during checkpoint selection: ${error}`);
+  } catch (error: unknown) {
+    throw new CommandFailedError("Error during checkpoint selection", { cause: error });
   }
 }
 

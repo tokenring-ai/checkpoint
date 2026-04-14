@@ -26,10 +26,10 @@ export default class AppCheckpointService implements TokenRingService {
       if (checkpoint) {
         this.app.restoreState(checkpoint.state);
       }
-    } else {
+    } else if (! this.checkpointProvider) {
       this.app.serviceError(
         this,
-        `No CheckpointProvider was registered, unable to save or restore app checkpoints`,
+        `No AppCheckpointProvider was registered, unable to save or restore app state at startup & shutdown`,
       );
     }
   }
