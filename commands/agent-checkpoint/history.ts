@@ -1,6 +1,7 @@
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {formatTime} from "@tokenring-ai/utility/date/formatTime";
 import indent from "@tokenring-ai/utility/string/indent";
 import AgentCheckpointService from "../../AgentCheckpointService.ts";
 import type {AgentCheckpointListItem} from "../../AgentCheckpointStorage.ts";
@@ -16,14 +17,6 @@ function groupCheckpointsByAgent(
     grouped[agentId].sort((a, b) => b.createdAt - a.createdAt);
   }
   return grouped;
-}
-
-function formatTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
 }
 
 async function displayCheckpointDetails(
