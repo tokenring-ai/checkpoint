@@ -1,5 +1,5 @@
-import type {AgentCheckpointData} from "@tokenring-ai/agent/types";
-import type {MaybePromise} from "bun";
+import type { AgentCheckpointData } from "@tokenring-ai/agent/types";
+import type { MaybePromise } from "bun";
 
 export interface NamedAgentCheckpoint extends AgentCheckpointData {
   name: string;

@@ -11,4 +11,4 @@ export type {
   ParsedAgentCheckpointConfig,
   ParsedAppCheckpointConfig,
 } from "./schema.ts";
-export {CheckpointConfigSchema} from "./schema.ts";
+export { CheckpointConfigSchema } from "./schema.ts";

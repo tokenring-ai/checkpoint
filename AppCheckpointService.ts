@@ -1,9 +1,9 @@
-import {AgentManager} from "@tokenring-ai/agent";
+import { AgentManager } from "@tokenring-ai/agent";
 import type TokenRingApp from "@tokenring-ai/app";
-import type {TokenRingService} from "@tokenring-ai/app/types";
-import type {AppCheckpointStorage} from "./AppCheckpointStorage.ts";
-import type {ParsedAppCheckpointConfig} from "./schema.ts";
-import {AppCheckpointState} from "./state/appCheckpointState.ts";
+import type { TokenRingService } from "@tokenring-ai/app/types";
+import type { AppCheckpointStorage } from "./AppCheckpointStorage.ts";
+import type { ParsedAppCheckpointConfig } from "./schema.ts";
+import { AppCheckpointState } from "./state/appCheckpointState.ts";
 
 export default class AppCheckpointService implements TokenRingService {
   readonly name = "AppCheckpointService";
@@ -21,16 +21,12 @@ export default class AppCheckpointService implements TokenRingService {
 
   async start(): Promise<void> {
     if (this.checkpointProvider && this.options.restorePreviousState) {
-      const checkpoint =
-        await this.checkpointProvider.retrieveLatestAppCheckpoint();
+      const checkpoint = await this.checkpointProvider.retrieveLatestAppCheckpoint();
       if (checkpoint) {
         this.app.restoreState(checkpoint.state);
       }
-    } else if (! this.checkpointProvider) {
-      this.app.serviceError(
-        this,
-        `No AppCheckpointProvider was registered, unable to save or restore app state at startup & shutdown`,
-      );
+    } else if (!this.checkpointProvider) {
+      this.app.serviceError(this, `No AppCheckpointProvider was registered, unable to save or restore app state at startup & shutdown`);
     }
   }
 

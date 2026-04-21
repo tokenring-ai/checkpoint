@@ -1,4 +1,4 @@
-import type {AppSessionCheckpoint} from "@tokenring-ai/app/types";
+import type { AppSessionCheckpoint } from "@tokenring-ai/app/types";
 
 export interface StoredAppCheckpoint extends AppSessionCheckpoint {
   id: string;

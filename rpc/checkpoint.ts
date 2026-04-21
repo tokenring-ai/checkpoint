@@ -1,6 +1,6 @@
 import AgentManager from "@tokenring-ai/agent/services/AgentManager";
 import type TokenRingApp from "@tokenring-ai/app";
-import {createRPCEndpoint} from "@tokenring-ai/rpc/createRPCEndpoint";
+import { createRPCEndpoint } from "@tokenring-ai/rpc/createRPCEndpoint";
 import AgentCheckpointService from "../AgentCheckpointService.ts";
 import CheckpointRpcSchema from "./schema.ts";
 
@@ -19,9 +19,7 @@ export default createRPCEndpoint(CheckpointRpcSchema, {
     const checkpointService = app.requireService(AgentCheckpointService);
     const agentManager = app.requireService(AgentManager);
 
-    const checkpoint = await checkpointService.retrieveAgentCheckpoint(
-      args.checkpointId,
-    );
+    const checkpoint = await checkpointService.retrieveAgentCheckpoint(args.checkpointId);
     if (!checkpoint) {
       throw new Error(`Checkpoint ${args.checkpointId} not found`);
     }

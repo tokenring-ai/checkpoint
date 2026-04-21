@@ -1,9 +1,9 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {AgentCreationContext} from "@tokenring-ai/agent/types";
+import type { AgentCreationContext } from "@tokenring-ai/agent/types";
 import type TokenRingApp from "@tokenring-ai/app";
-import type {TokenRingService} from "@tokenring-ai/app/types";
-import type {AgentCheckpointStorage} from "./AgentCheckpointStorage.ts";
-import type {ParsedAgentCheckpointConfig} from "./schema.ts";
+import type { TokenRingService } from "@tokenring-ai/app/types";
+import type { AgentCheckpointStorage } from "./AgentCheckpointStorage.ts";
+import type { ParsedAgentCheckpointConfig } from "./schema.ts";
 
 export default class AgentCheckpointService implements TokenRingService {
   readonly name = "AgentCheckpointService";
@@ -14,29 +14,18 @@ export default class AgentCheckpointService implements TokenRingService {
   constructor(
     readonly app: TokenRingApp,
     readonly options: ParsedAgentCheckpointConfig,
-  ) {
-  }
+  ) {}
 
   start(): void {
     if (!this.checkpointProvider) {
-      this.app.serviceError(
-        this,
-        `No CheckpointProvider was registered, unable to save checkpoints`,
-      );
+      this.app.serviceError(this, `No CheckpointProvider was registered, unable to save checkpoints`);
     }
   }
 
-  attach(
-    agent: Agent,
-    creationContext: AgentCreationContext,
-  ): void {
-    creationContext.items.push(
-      `Checkpoint Provider: ${this.checkpointProvider?.displayName ?? "(none)"}`,
-    );
+  attach(agent: Agent, creationContext: AgentCreationContext): void {
+    creationContext.items.push(`Checkpoint Provider: ${this.checkpointProvider?.displayName ?? "(none)"}`);
     if (!this.checkpointProvider) {
-      agent.warningMessage(
-        "No agent checkpoint provider is registered, agent checkpointing is disabled.",
-      );
+      agent.warningMessage("No agent checkpoint provider is registered, agent checkpointing is disabled.");
     }
   }
 

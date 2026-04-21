@@ -1,5 +1,5 @@
-import type {RPCSchema} from "@tokenring-ai/rpc/types";
-import {z} from "zod";
+import type { RPCSchema } from "@tokenring-ai/rpc/types";
+import { z } from "zod";
 
 export default {
   name: "Checkpoint RPC",
@@ -41,7 +41,7 @@ export default {
       result: z.object({
         agentId: z.string(),
         agentName: z.string(),
-        agentType: z.string().optional(),
+        agentType: z.string().exactOptional(),
       }),
     },
   },

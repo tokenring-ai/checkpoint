@@ -1,16 +1,13 @@
-import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import { CommandFailedError } from "@tokenring-ai/agent/AgentError";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
 import AppCheckpointService from "../../AppCheckpointService.ts";
 
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
-async function execute({
-                         agent,
-                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointService = agent.requireServiceByType(AppCheckpointService);
   const savedCheckpoints = await checkpointService.listAppCheckpoints();
-  if (savedCheckpoints.length === 0)
-    return "No checkpoints saved. Use /app checkpoint create to make one.";
+  if (savedCheckpoints.length === 0) return "No checkpoints saved. Use /app checkpoint create to make one.";
 
   const grouped: Record<string, typeof savedCheckpoints> = {};
   for (const cp of savedCheckpoints) {
@@ -20,13 +17,13 @@ async function execute({
 
   const tree = Object.keys(grouped)
     .sort((a, b) => b.localeCompare(a))
-    .map((date) => ({
+    .map(date => ({
       name: `📅 ${date} (${grouped[date].length} checkpoints)`,
       value: date,
       hasChildren: true,
       children: grouped[date]
         .sort((a, b) => b.createdAt - a.createdAt)
-        .map((cp) => ({
+        .map(cp => ({
           name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - Session ${cp.sessionId}@${cp.hostname}:${cp.projectDirectory}`,
           value: cp.id,
         })),
@@ -44,8 +41,7 @@ async function execute({
         tree,
       },
     });
-    if (selection == null)
-      return "Checkpoint selection cancelled. No changes made.";
+    if (selection == null) return "Checkpoint selection cancelled. No changes made.";
     await checkpointService.restoreAppCheckpoint(selection[0]);
     return `Checkpoint ${selection[0]} loaded`;
   } catch (error: unknown) {
