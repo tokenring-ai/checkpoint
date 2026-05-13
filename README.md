@@ -2,7 +2,9 @@
 
 ## Overview
 
-The `@tokenring-ai/checkpoint` package provides persistent state management for both agents and applications within the Token Ring framework. It enables saving snapshots of current state and restoring them later, supporting workflow interruption, experimentation, and session recovery.
+The `@tokenring-ai/checkpoint` package provides persistent state management for both agents and applications within the
+Token Ring framework. It enables saving snapshots of current state and restoring them later, supporting workflow
+interruption, experimentation, and session recovery.
 
 **Key Features:**
 
@@ -27,15 +29,15 @@ bun run build
 
 ## Chat Commands
 
-| Command | Description |
-|---------|-------------|
-| `/agent checkpoint create [label]` | Create a checkpoint of the current agent state with an optional label |
-| `/agent checkpoint restore <id>` | Restore agent state from a specific checkpoint by ID |
-| `/agent checkpoint list` | Open an interactive tree browser to select and restore a checkpoint |
-| `/agent checkpoint history` | Browse checkpoint history grouped by agent ID |
-| `/app checkpoint create` | Create a checkpoint of the current app state |
-| `/app checkpoint list` | Open an interactive tree browser to select and restore an app checkpoint |
-| `/app checkpoint history` | Browse app checkpoint history grouped by date |
+| Command                            | Description                                                              |
+|------------------------------------|--------------------------------------------------------------------------|
+| `/agent checkpoint create [label]` | Create a checkpoint of the current agent state with an optional label    |
+| `/agent checkpoint restore <id>`   | Restore agent state from a specific checkpoint by ID                     |
+| `/agent checkpoint list`           | Open an interactive tree browser to select and restore a checkpoint      |
+| `/agent checkpoint history`        | Browse checkpoint history grouped by agent ID                            |
+| `/app checkpoint create`           | Create a checkpoint of the current app state                             |
+| `/app checkpoint list`             | Open an interactive tree browser to select and restore an app checkpoint |
+| `/app checkpoint history`          | Browse app checkpoint history grouped by date                            |
 
 ## Tools
 
@@ -694,7 +696,8 @@ Create a new agent from a checkpoint.
 
 ### `autoCheckpoint`
 
-Automatically creates a checkpoint after each agent input is processed. Enabled by default when the package is attached to an agent.
+Automatically creates a checkpoint after each agent input is processed. Enabled by default when the package is attached
+to an agent.
 
 **Hook Points:**
 
@@ -1030,8 +1033,10 @@ class MemoryAppCheckpointProvider implements AppCheckpointStorage {
 1. **Register a Provider**: Always register a checkpoint provider before using checkpoint features
 2. **Named Checkpoints**: Create named checkpoints at logical decision points
 3. **Provider Selection**: Set an appropriate provider for your use case:
-   - Memory provider for testing/experimentation
-   - Persistent provider (file system, database) for production
+
+- Memory provider for testing/experimentation
+- Persistent provider (file system, database) for production
+
 4. **Cleanup**: Periodically list and manage checkpoints to manage storage
 5. **Error Handling**: Always catch restore errors for graceful degradation
 6. **RPC Usage**: Use RPC endpoints for remote checkpoint management and agent spawning

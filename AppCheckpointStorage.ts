@@ -3,6 +3,7 @@ import type { AppSessionCheckpoint } from "@tokenring-ai/app/types";
 export interface StoredAppCheckpoint extends AppSessionCheckpoint {
   id: string;
 }
+
 export type AppSessionListItem = Omit<StoredAppCheckpoint, "state">;
 
 export interface AppCheckpointStorage {
