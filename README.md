@@ -2,9 +2,7 @@
 
 ## Overview
 
-The `@tokenring-ai/checkpoint` package provides persistent state management for both agents and applications within the
-Token Ring framework. It enables saving snapshots of current state and restoring them later, supporting workflow
-interruption, experimentation, and session recovery.
+The `@tokenring-ai/checkpoint` package provides persistent state management for both agents and applications within the Token Ring framework. It enables saving snapshots of current state and restoring them later, supporting workflow interruption, experimentation, and session recovery.
 
 **Key Features:**
 
@@ -29,15 +27,22 @@ bun run build
 
 ## Chat Commands
 
+### Agent Checkpoint Commands
+
 | Command                            | Description                                                              |
 |------------------------------------|--------------------------------------------------------------------------|
 | `/agent checkpoint create [label]` | Create a checkpoint of the current agent state with an optional label    |
 | `/agent checkpoint restore <id>`   | Restore agent state from a specific checkpoint by ID                     |
 | `/agent checkpoint list`           | Open an interactive tree browser to select and restore a checkpoint      |
 | `/agent checkpoint history`        | Browse checkpoint history grouped by agent ID                            |
-| `/app checkpoint create`           | Create a checkpoint of the current app state                             |
-| `/app checkpoint list`             | Open an interactive tree browser to select and restore an app checkpoint |
-| `/app checkpoint history`          | Browse app checkpoint history grouped by date                            |
+
+### App Checkpoint Commands
+
+| Command                      | Description                                                              |
+|------------------------------|--------------------------------------------------------------------------|
+| `/app checkpoint create`     | Create a checkpoint of the current app state                             |
+| `/app checkpoint list`       | Open an interactive tree browser to select and restore an app checkpoint |
+| `/app checkpoint history`    | Browse app checkpoint history grouped by date                            |
 
 ## Tools
 
@@ -335,7 +340,7 @@ const checkpoints = await service.listAgentCheckpoints();
 // Returns: Array of checkpoint list items
 ```
 
-#### `retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>` (Agent Service)
+#### `retrieveAgentCheckpoint()`: Retrieve Agent Checkpoint
 
 Retrieves a specific checkpoint with full state data.
 
@@ -409,7 +414,7 @@ const checkpoints = await service.listAppCheckpoints();
 // Returns: Array of app checkpoint list items
 ```
 
-#### `retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null>` (App Service)
+#### `retrieveAppCheckpoint()`: Retrieve App Checkpoint
 
 Retrieves a specific app checkpoint with full state data.
 
@@ -418,7 +423,7 @@ const checkpoint = await service.retrieveAppCheckpoint(checkpointId);
 // Returns: Full checkpoint or null
 ```
 
-#### `retrieveLatestAppCheckpoint()`: Retrieve Latest
+#### `retrieveLatestAppCheckpoint()`: Retrieve Latest App Checkpoint
 
 Retrieves the most recent app checkpoint (via provider).
 
@@ -479,7 +484,7 @@ async storeAgentCheckpoint(data: NamedAgentCheckpoint): Promise<string> {
 }
 ```
 
-#### `retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>` (Agent Provider)
+#### `retrieveAgentCheckpoint()`: Agent Provider Method
 
 Retrieves a checkpoint by ID.
 
@@ -489,7 +494,7 @@ async retrieveAgentCheckpoint(id: string): Promise<StoredAgentCheckpoint | null>
 }
 ```
 
-#### `listAgentCheckpoints(): Promise<AgentCheckpointListItem[]>`
+#### `listAgentCheckpoints()`: Agent Provider List
 
 Lists all stored checkpoints (without state data).
 
@@ -530,7 +535,7 @@ async storeAppCheckpoint(data: AppSessionCheckpoint): Promise<string> {
 }
 ```
 
-#### `retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null>` (App Provider)
+#### `retrieveAppCheckpoint()`: App Provider Method
 
 Retrieves a checkpoint by ID.
 
@@ -540,7 +545,7 @@ async retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null> {
 }
 ```
 
-#### `listAppCheckpoints(): Promise<AppSessionListItem[]>`
+#### `listAppCheckpoints()`: App Provider List
 
 Lists all stored checkpoints (without state data).
 
@@ -598,7 +603,7 @@ The package provides JSON-RPC endpoints for remote checkpoint operations.
 
 ### `listCheckpoints`
 
-Query all available checkpoints without state data.
+Query all available agent checkpoints without state data.
 
 **Request:**
 
@@ -626,7 +631,7 @@ Query all available checkpoints without state data.
 
 ### `getCheckpoint`
 
-Retrieve a specific checkpoint with full state data.
+Retrieve a specific agent checkpoint with full state data.
 
 **Request:**
 
@@ -692,12 +697,13 @@ Create a new agent from a checkpoint.
 }
 ```
 
+**Note:** All RPC endpoints operate on agent checkpoints only. App checkpoints are managed through the chat commands and service API.
+
 ## Hooks
 
 ### `autoCheckpoint`
 
-Automatically creates a checkpoint after each agent input is processed. Enabled by default when the package is attached
-to an agent.
+Automatically creates a checkpoint after each agent input is processed. Enabled by default when the package is attached to an agent.
 
 **Hook Points:**
 
@@ -727,7 +733,7 @@ The checkpoint service provides state management through:
 - **Checkpoint Persistence**: Store and retrieve agent and app states
 - **Provider Registration**: Configure storage backends
 - **State Restoration**: Restore complete state from checkpoints
-- **AppCheckpointState**: Manages app-level checkpoint state with agent checkpoints
+- **AppCheckpointState**: Manages app-level checkpoint state across agents
 
 ### AppCheckpointState
 
@@ -917,7 +923,7 @@ import { z } from "zod";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
 import AppCheckpointService from "./AppCheckpointService.ts";
 import agentCommands from "./commands.ts";
-import hooks from "./hooks.ts";
+import autoCheckpoint from "./hooks/autoCheckpoint.ts";
 import packageJSON from "./package.json" with { type: "json" };
 import checkpointRPC from "./rpc/checkpoint.ts";
 import { CheckpointConfigSchema } from "./schema.ts";
@@ -942,7 +948,7 @@ export default {
       agentCommandService.addAgentCommands(agentCommands)
     );
     app.waitForService(AgentLifecycleService, lifecycleService =>
-      lifecycleService.addHooks(hooks)
+      lifecycleService.addHooks(autoCheckpoint)
     );
     app.waitForService(RpcService, rpcService => {
       rpcService.registerEndpoint(checkpointRPC);
@@ -1033,10 +1039,8 @@ class MemoryAppCheckpointProvider implements AppCheckpointStorage {
 1. **Register a Provider**: Always register a checkpoint provider before using checkpoint features
 2. **Named Checkpoints**: Create named checkpoints at logical decision points
 3. **Provider Selection**: Set an appropriate provider for your use case:
-
-- Memory provider for testing/experimentation
-- Persistent provider (file system, database) for production
-
+   - Memory provider for testing/experimentation
+   - Persistent provider (file system, database) for production
 4. **Cleanup**: Periodically list and manage checkpoints to manage storage
 5. **Error Handling**: Always catch restore errors for graceful degradation
 6. **RPC Usage**: Use RPC endpoints for remote checkpoint management and agent spawning
@@ -1089,8 +1093,7 @@ pkg/checkpoint/
 ├── plugin.ts                      # Plugin registration
 ├── index.ts                       # Package exports
 ├── commands.ts                    # Command definitions
-├── hooks.ts                       # Hook definitions
-├── hooks/
+├── hooks/                         # Hook implementations
 │   └── autoCheckpoint.ts         # Auto-checkpointing hook
 ├── commands/
 │   ├── agent-checkpoint/

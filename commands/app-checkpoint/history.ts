@@ -60,7 +60,7 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
     .map(date => ({
       name: `📅 ${date} (${checkpointsByDate[date].length} checkpoints)`,
       children: checkpointsByDate[date].map(cp => {
-        const label = (cp as any)._label || `Checkpoint ${cp.sessionId.slice(0, 8)}`;
+        const label = `Checkpoint ${cp.sessionId.slice(0, 8)}`;
         return {
           name: `📋 ${label} (${formatTime(cp.createdAt)})`,
           value: cp.sessionId,
