@@ -1,8 +1,11 @@
-import type { AppSessionCheckpoint } from "@tokenring-ai/app/types";
+import { type AppSessionCheckpoint, AppSessionCheckpointSchema } from "@tokenring-ai/app/schema";
+import z from "zod";
 
-export interface StoredAppCheckpoint extends AppSessionCheckpoint {
-  id: string;
-}
+export const StoredAppCheckpointSchema = AppSessionCheckpointSchema.extend({
+  id: z.string().transform(v => typeof v === 'number' ? String(v) : v)
+});
+
+export type StoredAppCheckpoint = z.input<typeof StoredAppCheckpointSchema>
 
 export type AppSessionListItem = Omit<StoredAppCheckpoint, "state">;
 

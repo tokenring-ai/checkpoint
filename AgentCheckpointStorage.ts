@@ -1,13 +1,18 @@
-import type { AgentCheckpointData } from "@tokenring-ai/agent/types";
+import { AgentCheckpointSchema } from "@tokenring-ai/agent/types";
 import type { MaybePromise } from "bun";
+import z from "zod";
 
-export interface NamedAgentCheckpoint extends AgentCheckpointData {
-  name: string;
-}
+export const NamedAgentCheckpointSchema = AgentCheckpointSchema.extend({
+  name: z.string()
+});
 
-export interface StoredAgentCheckpoint extends NamedAgentCheckpoint {
-  id: string;
-}
+export type NamedAgentCheckpoint = z.input<typeof NamedAgentCheckpointSchema>;
+
+export const StoredAgentCheckpointSchema = NamedAgentCheckpointSchema.extend({
+  id: z.number()
+});
+
+export type StoredAgentCheckpoint = z.input<typeof StoredAgentCheckpointSchema>
 
 export type AgentCheckpointListItem = Omit<StoredAgentCheckpoint, "state">;
 
