@@ -19,9 +19,9 @@ export type AgentCheckpointListItem = Omit<StoredAgentCheckpoint, "state">;
 export interface AgentCheckpointStorage {
   displayName: string;
 
-  storeAgentCheckpoint(data: NamedAgentCheckpoint): MaybePromise<string>;
+  storeAgentCheckpoint(data: NamedAgentCheckpoint): MaybePromise<number>;
 
-  retrieveAgentCheckpoint(id: string): MaybePromise<StoredAgentCheckpoint | null>;
+  retrieveAgentCheckpoint(id: number): MaybePromise<StoredAgentCheckpoint | null>;
 
   listAgentCheckpoints(): MaybePromise<AgentCheckpointListItem[]>;
 }

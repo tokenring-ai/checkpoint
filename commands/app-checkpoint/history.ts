@@ -27,7 +27,7 @@ async function displayCheckpointDetails(checkpointItem: AppSessionListItem, chec
     `Working Directory: ${checkpointItem.projectDirectory}`,
   ];
   try {
-    const fullCheckpoint = await checkpointStorage.retrieveAppCheckpoint(checkpointItem.sessionId);
+    const fullCheckpoint = await checkpointStorage.retrieveAppCheckpoint(checkpointItem.id);
     if (fullCheckpoint) {
       lines.push(`\n📋 Checkpoint State:`);
       for (const [name, stateData] of Object.entries(fullCheckpoint.state)) {

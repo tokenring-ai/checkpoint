@@ -42,8 +42,12 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
       },
     });
     if (selection == null) return "Checkpoint selection cancelled. No changes made.";
-    await checkpointService.restoreAppCheckpoint(selection[0]);
-    return `Checkpoint ${selection[0]} loaded`;
+    const selectedCheckpoint = Number(selection[0]);
+    if (!Number.isInteger(selectedCheckpoint)) {
+      throw new CommandFailedError(`Invalid checkpoint ID: ${selection[0]}`);
+    }
+    await checkpointService.restoreAppCheckpoint(selectedCheckpoint);
+    return `Checkpoint ${selectedCheckpoint} loaded`;
   } catch (error: unknown) {
     throw new CommandFailedError("Error during checkpoint selection", { cause: error });
   }

@@ -59,7 +59,7 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
       name: `🤖 Agent: ${agentId} (${checkpointsByAgent[agentId].length} checkpoints)`,
       children: checkpointsByAgent[agentId].map(cp => ({
         name: `📋 ${cp.name} (${formatTime(cp.createdAt)})`,
-        value: cp.id,
+        value: String(cp.id),
       })),
     }));
 
@@ -77,7 +77,7 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
 
   if (!selection) return "Checkpoint browsing cancelled.";
 
-  const selected = checkpoints.find(({ id }) => id === selection[0]);
+  const selected = checkpoints.find(({ id }) => String(id) === selection[0]);
   if (!selected) throw new CommandFailedError(`Checkpoint ${selection[0]} could not be retrieved.`);
   return displayCheckpointDetails(selected, checkpointStorage);
 }

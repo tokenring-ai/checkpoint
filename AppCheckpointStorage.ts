@@ -2,7 +2,7 @@ import { type AppSessionCheckpoint, AppSessionCheckpointSchema } from "@tokenrin
 import z from "zod";
 
 export const StoredAppCheckpointSchema = AppSessionCheckpointSchema.extend({
-  id: z.string().transform(v => typeof v === 'number' ? String(v) : v)
+  id: z.number(),
 });
 
 export type StoredAppCheckpoint = z.input<typeof StoredAppCheckpointSchema>
@@ -12,9 +12,9 @@ export type AppSessionListItem = Omit<StoredAppCheckpoint, "state">;
 export interface AppCheckpointStorage {
   displayName: string;
 
-  storeAppCheckpoint(data: AppSessionCheckpoint): Promise<string>;
+  storeAppCheckpoint(data: AppSessionCheckpoint): Promise<number>;
 
-  retrieveAppCheckpoint(id: string): Promise<StoredAppCheckpoint | null>;
+  retrieveAppCheckpoint(id: number): Promise<StoredAppCheckpoint | null>;
 
   listAppCheckpoints(): Promise<AppSessionListItem[]>;
 

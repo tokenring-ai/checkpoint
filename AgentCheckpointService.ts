@@ -33,17 +33,17 @@ export default class AgentCheckpointService implements TokenRingService {
     this.checkpointProvider = provider;
   }
 
-  async saveAgentCheckpoint(name: string, agent: Agent): Promise<string> {
+  async saveAgentCheckpoint(name: string, agent: Agent): Promise<number> {
     if (!this.checkpointProvider) {
       throw new Error("No checkpoint provider is registered");
     }
-    return await this.checkpointProvider.storeAgentCheckpoint({
+    return this.checkpointProvider.storeAgentCheckpoint({
       name,
       ...agent.generateCheckpoint(),
     });
   }
 
-  async restoreAgentCheckpoint(id: string, agent: Agent): Promise<void> {
+  async restoreAgentCheckpoint(id: number, agent: Agent): Promise<void> {
     const checkpoint = await this.retrieveAgentCheckpoint(id);
     if (!checkpoint) {
       throw new Error(`Checkpoint ${id} not found`);
@@ -58,7 +58,7 @@ export default class AgentCheckpointService implements TokenRingService {
     return await this.checkpointProvider.listAgentCheckpoints();
   }
 
-  async retrieveAgentCheckpoint(checkpointId: string) {
+  async retrieveAgentCheckpoint(checkpointId: number) {
     if (!this.checkpointProvider) {
       throw new Error("No checkpoint provider is registered");
     }

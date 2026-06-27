@@ -26,7 +26,7 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
         .sort((a, b) => b.createdAt - a.createdAt)
         .map(cp => ({
           name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - ${cp.name}`,
-          value: cp.id,
+          value: String(cp.id),
         })),
     }));
 
@@ -43,7 +43,10 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
       },
     });
     if (selection == null || selection.length === 0) return "Checkpoint selection cancelled. No changes made.";
-    const selectedCheckpoint = selection[0];
+    const selectedCheckpoint = Number(selection[0]);
+    if (!Number.isInteger(selectedCheckpoint)) {
+      throw new CommandFailedError(`Invalid checkpoint ID: ${selection[0]}`);
+    }
     await checkpointService.restoreAgentCheckpoint(selectedCheckpoint, agent);
     return `Checkpoint ${selectedCheckpoint} loaded`;
   } catch (error: unknown) {

@@ -10,7 +10,7 @@ export default {
       input: z.object({}),
       result: z.array(
         z.object({
-          id: z.string(),
+          id: z.number(),
           name: z.string(),
           agentId: z.string(),
           createdAt: z.number(),
@@ -20,11 +20,11 @@ export default {
     getCheckpoint: {
       type: "query",
       input: z.object({
-        id: z.string(),
+        id: z.number(),
       }),
       result: z
         .object({
-          id: z.string(),
+          id: z.number(),
           name: z.string(),
           agentId: z.string(),
           createdAt: z.number(),
@@ -35,7 +35,7 @@ export default {
     launchAgentFromCheckpoint: {
       type: "mutation",
       input: z.object({
-        checkpointId: z.string(),
+        checkpointId: z.number(),
         headless: z.boolean().default(false),
       }),
       result: z.object({

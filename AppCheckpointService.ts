@@ -40,7 +40,7 @@ export default class AppCheckpointService implements TokenRingService {
     this.checkpointProvider = provider;
   }
 
-  async saveAppCheckpoint(): Promise<string> {
+  async saveAppCheckpoint(): Promise<number> {
     if (!this.checkpointProvider) {
       throw new Error("No checkpoint provider is registered");
     }
@@ -53,7 +53,7 @@ export default class AppCheckpointService implements TokenRingService {
     });
   }
 
-  async restoreAppCheckpoint(id: string): Promise<void> {
+  async restoreAppCheckpoint(id: number): Promise<void> {
     const checkpoint = await this.retrieveAppCheckpoint(id);
     if (!checkpoint) {
       throw new Error(`Checkpoint ${id} not found`);
@@ -68,7 +68,7 @@ export default class AppCheckpointService implements TokenRingService {
     return await this.checkpointProvider.listAppCheckpoints();
   }
 
-  async retrieveAppCheckpoint(checkpointId: string) {
+  async retrieveAppCheckpoint(checkpointId: number) {
     if (!this.checkpointProvider) {
       throw new Error("No checkpoint provider is registered");
     }
