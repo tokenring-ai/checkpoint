@@ -5,9 +5,17 @@ export const StoredAppCheckpointSchema = AppSessionCheckpointSchema.extend({
   id: z.number(),
 });
 
-export type StoredAppCheckpoint = z.input<typeof StoredAppCheckpointSchema>
+export type StoredAppCheckpoint = z.input<typeof StoredAppCheckpointSchema>;
 
-export type AppSessionListItem = Omit<StoredAppCheckpoint, "state">;
+export const AppCheckpointListItemSchema = StoredAppCheckpointSchema.pick({
+  id: true,
+  sessionId: true,
+  hostname: true,
+  projectDirectory: true,
+  createdAt: true,
+});
+
+export type AppSessionListItem = z.output<typeof AppCheckpointListItemSchema>;
 
 export interface AppCheckpointStorage {
   displayName: string;

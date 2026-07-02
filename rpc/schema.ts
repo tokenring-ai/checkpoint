@@ -1,5 +1,11 @@
 import type { RPCSchema } from "@tokenring-ai/rpc/types";
 import { z } from "zod";
+import { NamedAgentCheckpointSchema } from "../AgentCheckpointStorage.ts";
+import { AgentCheckpointListItemSchema } from "../AgentCheckpointStorage.ts";
+
+export const CheckpointNotFoundSchema = z.object({
+  status: z.literal("checkpointNotFound")
+});
 
 export default {
   name: "Checkpoint RPC",
@@ -8,29 +14,25 @@ export default {
     listCheckpoints: {
       type: "query",
       input: z.object({}),
-      result: z.array(
-        z.object({
-          id: z.number(),
-          name: z.string(),
-          agentId: z.string(),
-          createdAt: z.number(),
-        }),
-      ),
+      result: z.array(AgentCheckpointListItemSchema),
+    },
+    streamCheckpoints: {
+      type: "stream",
+      input: z.object({}),
+      result: z.array(AgentCheckpointListItemSchema),
     },
     getCheckpoint: {
       type: "query",
       input: z.object({
         id: z.number(),
       }),
-      result: z
-        .object({
-          id: z.number(),
-          name: z.string(),
-          agentId: z.string(),
-          createdAt: z.number(),
-          state: z.any(),
-        })
-        .nullable(),
+      result: z.discriminatedUnion("status", [
+        z.object({
+          status: z.literal("success"),
+          checkpoint: NamedAgentCheckpointSchema
+        }),
+        CheckpointNotFoundSchema,
+      ]),
     },
     launchAgentFromCheckpoint: {
       type: "mutation",
@@ -38,11 +40,15 @@ export default {
         checkpointId: z.number(),
         headless: z.boolean().default(false),
       }),
-      result: z.object({
-        agentId: z.string(),
-        agentName: z.string(),
-        agentType: z.string().exactOptional(),
-      }),
+      result: z.discriminatedUnion("status", [
+        z.object({
+          status: z.literal("success"),
+          agentId: z.string(),
+          agentName: z.string(),
+          agentType: z.string().exactOptional(),
+        }),
+        CheckpointNotFoundSchema
+      ])
     },
   },
 } satisfies RPCSchema;

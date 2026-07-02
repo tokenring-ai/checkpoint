@@ -12,9 +12,18 @@ export const StoredAgentCheckpointSchema = NamedAgentCheckpointSchema.extend({
   id: z.number()
 });
 
-export type StoredAgentCheckpoint = z.input<typeof StoredAgentCheckpointSchema>
+export type StoredAgentCheckpoint = z.input<typeof StoredAgentCheckpointSchema>;
 
-export type AgentCheckpointListItem = Omit<StoredAgentCheckpoint, "state">;
+export const AgentCheckpointListItemSchema = StoredAgentCheckpointSchema.pick({
+  id: true,
+  sessionId: true,
+  name: true,
+  agentId: true,
+  agentType: true,
+  createdAt: true,
+});
+
+export type AgentCheckpointListItem = z.output<typeof AgentCheckpointListItemSchema>;
 
 export interface AgentCheckpointStorage {
   displayName: string;
