@@ -27,7 +27,7 @@ export default createRPCEndpoint(CheckpointRpcSchema, {
     if (checkpoint) {
       return {
         status: "success",
-        checkpoint
+        checkpoint,
       };
     }
 
@@ -41,7 +41,7 @@ export default createRPCEndpoint(CheckpointRpcSchema, {
     const checkpoint = await checkpointService.retrieveAgentCheckpoint(args.checkpointId);
     if (!checkpoint) {
       return {
-        status: "checkpointNotFound"
+        status: "checkpointNotFound",
       };
     }
 

@@ -1,10 +1,11 @@
+import { SuccessSchema } from "@tokenring-ai/rpc/types";
 import type { RPCSchema } from "@tokenring-ai/rpc/types";
 import { z } from "zod";
 import { NamedAgentCheckpointSchema } from "../AgentCheckpointStorage.ts";
 import { AgentCheckpointListItemSchema } from "../AgentCheckpointStorage.ts";
 
 export const CheckpointNotFoundSchema = z.object({
-  status: z.literal("checkpointNotFound")
+  status: z.literal("checkpointNotFound"),
 });
 
 export default {
@@ -27,9 +28,8 @@ export default {
         id: z.number(),
       }),
       result: z.discriminatedUnion("status", [
-        z.object({
-          status: z.literal("success"),
-          checkpoint: NamedAgentCheckpointSchema
+        SuccessSchema.extend({
+          checkpoint: NamedAgentCheckpointSchema,
         }),
         CheckpointNotFoundSchema,
       ]),
@@ -41,14 +41,13 @@ export default {
         headless: z.boolean().default(false),
       }),
       result: z.discriminatedUnion("status", [
-        z.object({
-          status: z.literal("success"),
+        SuccessSchema.extend({
           agentId: z.string(),
           agentName: z.string(),
           agentType: z.string().exactOptional(),
         }),
-        CheckpointNotFoundSchema
-      ])
+        CheckpointNotFoundSchema,
+      ]),
     },
   },
 } satisfies RPCSchema;

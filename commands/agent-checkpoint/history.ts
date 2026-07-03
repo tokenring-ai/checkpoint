@@ -11,8 +11,8 @@ function groupCheckpointsByAgent(checkpoints: AgentCheckpointListItem[]): Record
   for (const checkpoint of checkpoints) {
     (grouped[checkpoint.agentId] ??= []).push(checkpoint);
   }
-  for (const agentId in grouped) {
-    grouped[agentId].sort((a, b) => b.createdAt - a.createdAt);
+  for (const [agentId, items] of Object.entries(grouped)) {
+    items.sort((a, b) => b.createdAt - a.createdAt);
   }
   return grouped;
 }
@@ -53,11 +53,11 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
   if (!checkpoints?.length) return "No checkpoint history found.";
 
   const checkpointsByAgent = groupCheckpointsByAgent(checkpoints);
-  const tree: TreeLeaf[] = Object.keys(checkpointsByAgent)
-    .sort()
-    .map(agentId => ({
-      name: `🤖 Agent: ${agentId} (${checkpointsByAgent[agentId].length} checkpoints)`,
-      children: checkpointsByAgent[agentId].map(cp => ({
+  const tree: TreeLeaf[] = Object.entries(checkpointsByAgent)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([agentId, items]) => ({
+      name: `🤖 Agent: ${agentId} (${items.length} checkpoints)`,
+      children: items.map(cp => ({
         name: `📋 ${cp.name} (${formatTime(cp.createdAt)})`,
         value: String(cp.id),
       })),

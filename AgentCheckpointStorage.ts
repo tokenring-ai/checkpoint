@@ -3,13 +3,13 @@ import type { MaybePromise } from "bun";
 import z from "zod";
 
 export const NamedAgentCheckpointSchema = AgentCheckpointSchema.extend({
-  name: z.string()
+  name: z.string(),
 });
 
 export type NamedAgentCheckpoint = z.input<typeof NamedAgentCheckpointSchema>;
 
 export const StoredAgentCheckpointSchema = NamedAgentCheckpointSchema.extend({
-  id: z.number()
+  id: z.number(),
 });
 
 export type StoredAgentCheckpoint = z.input<typeof StoredAgentCheckpointSchema>;

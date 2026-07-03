@@ -18,11 +18,11 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
     (grouped[date] ??= []).push(cp);
   }
 
-  const tree: TreeLeaf[] = Object.keys(grouped)
-    .sort((a, b) => b.localeCompare(a))
-    .map(date => ({
-      name: `📅 ${date} (${grouped[date].length} checkpoints)`,
-      children: grouped[date]
+  const tree: TreeLeaf[] = Object.entries(grouped)
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([date, items]) => ({
+      name: `📅 ${date} (${items.length} checkpoints)`,
+      children: items
         .sort((a, b) => b.createdAt - a.createdAt)
         .map(cp => ({
           name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - ${cp.name}`,

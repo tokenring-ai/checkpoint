@@ -12,8 +12,8 @@ function groupCheckpointsByDate(checkpoints: AppSessionListItem[]): Record<strin
     const date = new Date(checkpoint.createdAt).toISOString().slice(0, 10);
     (grouped[date] ??= []).push(checkpoint);
   }
-  for (const date in grouped) {
-    grouped[date].sort((a, b) => b.createdAt - a.createdAt);
+  for (const [date, items] of Object.entries(grouped)) {
+    items.sort((a, b) => b.createdAt - a.createdAt);
   }
   return grouped;
 }
@@ -54,12 +54,11 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
   if (!checkpoints?.length) return "No app checkpoint history found.";
 
   const checkpointsByDate = groupCheckpointsByDate(checkpoints);
-  const tree: TreeLeaf[] = Object.keys(checkpointsByDate)
-    .sort()
-    .reverse()
-    .map(date => ({
-      name: `📅 ${date} (${checkpointsByDate[date].length} checkpoints)`,
-      children: checkpointsByDate[date].map(cp => {
+  const tree: TreeLeaf[] = Object.entries(checkpointsByDate)
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([date, items]) => ({
+      name: `📅 ${date} (${items.length} checkpoints)`,
+      children: items.map(cp => {
         const label = `Checkpoint ${cp.sessionId.slice(0, 8)}`;
         return {
           name: `📋 ${label} (${formatTime(cp.createdAt)})`,
