@@ -1,7 +1,7 @@
 {
   "name": "@tokenring-ai/checkpoint",
   "version": "0.2.0",
-  "description": "State preservation service for pausing and resuming agent workflows.",
+  "description": "Persistent state management for agents and applications, enabling checkpoint creation, restoration, and session recovery.",
   "dependencies": {
     "@tokenring-ai/app": "workspace:*",
     "zod": "^4.4.3",
