@@ -11,7 +11,7 @@ function groupCheckpointsByAgent(checkpoints: AgentCheckpointListItem[]): Record
   for (const checkpoint of checkpoints) {
     (grouped[checkpoint.agentId] ??= []).push(checkpoint);
   }
-  for (const [agentId, items] of Object.entries(grouped)) {
+  for (const items of Object.values(grouped)) {
     items.sort((a, b) => b.createdAt - a.createdAt);
   }
   return grouped;
@@ -50,7 +50,7 @@ const inputSchema = {} as const satisfies AgentCommandInputSchema;
 async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointStorage = agent.requireServiceByType(AgentCheckpointService);
   const checkpoints = await checkpointStorage.listAgentCheckpoints();
-  if (!checkpoints?.length) return "No checkpoint history found.";
+  if (!checkpoints.length) return "No checkpoint history found.";
 
   const checkpointsByAgent = groupCheckpointsByAgent(checkpoints);
   const tree: TreeLeaf[] = Object.entries(checkpointsByAgent)

@@ -48,8 +48,8 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
     }
     await checkpointService.restoreAppCheckpoint(selectedCheckpoint);
     return `Checkpoint ${selectedCheckpoint} loaded`;
-  } catch (error: unknown) {
-    throw new CommandFailedError("Error during checkpoint selection", { cause: error });
+  } catch (err) {
+    throw new CommandFailedError("Error during checkpoint selection", { cause: err });
   }
 }
 

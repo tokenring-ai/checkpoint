@@ -1,6 +1,7 @@
 import { AgentManager } from "@tokenring-ai/agent";
 import type TokenRingApp from "@tokenring-ai/app";
 import type { TokenRingService } from "@tokenring-ai/app/types";
+import { ConfigurationError } from "@tokenring-ai/app/types";
 import type { AppCheckpointStorage } from "./AppCheckpointStorage.ts";
 import type { ParsedAppCheckpointConfig } from "./schema.ts";
 import { AppCheckpointState } from "./state/appCheckpointState.ts";
@@ -42,7 +43,7 @@ export default class AppCheckpointService implements TokenRingService {
 
   async saveAppCheckpoint(): Promise<number> {
     if (!this.checkpointProvider) {
-      throw new Error("No checkpoint provider is registered");
+      throw new ConfigurationError(this.name, "No checkpoint provider is registered");
     }
     return await this.checkpointProvider.storeAppCheckpoint({
       sessionId: this.app.sessionId,
@@ -63,14 +64,14 @@ export default class AppCheckpointService implements TokenRingService {
 
   async listAppCheckpoints() {
     if (!this.checkpointProvider) {
-      throw new Error("No checkpoint provider is registered");
+      throw new ConfigurationError(this.name, "No checkpoint provider is registered");
     }
     return await this.checkpointProvider.listAppCheckpoints();
   }
 
   async retrieveAppCheckpoint(checkpointId: number) {
     if (!this.checkpointProvider) {
-      throw new Error("No checkpoint provider is registered");
+      throw new ConfigurationError(this.name, "No checkpoint provider is registered");
     }
     return await this.checkpointProvider.retrieveAppCheckpoint(checkpointId);
   }

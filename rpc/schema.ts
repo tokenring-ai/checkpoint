@@ -1,8 +1,7 @@
-import { SuccessSchema } from "@tokenring-ai/rpc/types";
 import type { RPCSchema } from "@tokenring-ai/rpc/types";
+import { SuccessSchema } from "@tokenring-ai/rpc/types";
 import { z } from "zod";
-import { NamedAgentCheckpointSchema } from "../AgentCheckpointStorage.ts";
-import { AgentCheckpointListItemSchema } from "../AgentCheckpointStorage.ts";
+import { AgentCheckpointListItemSchema, NamedAgentCheckpointSchema } from "../AgentCheckpointStorage.ts";
 
 export const CheckpointNotFoundSchema = z.object({
   status: z.literal("checkpointNotFound"),

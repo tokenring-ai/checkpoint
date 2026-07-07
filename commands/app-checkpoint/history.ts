@@ -12,7 +12,7 @@ function groupCheckpointsByDate(checkpoints: AppSessionListItem[]): Record<strin
     const date = new Date(checkpoint.createdAt).toISOString().slice(0, 10);
     (grouped[date] ??= []).push(checkpoint);
   }
-  for (const [date, items] of Object.entries(grouped)) {
+  for (const items of Object.values(grouped)) {
     items.sort((a, b) => b.createdAt - a.createdAt);
   }
   return grouped;
@@ -51,7 +51,7 @@ const inputSchema = {} as const satisfies AgentCommandInputSchema;
 async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointStorage = agent.requireServiceByType(AppCheckpointService);
   const checkpoints = await checkpointStorage.listAppCheckpoints();
-  if (!checkpoints?.length) return "No app checkpoint history found.";
+  if (!checkpoints.length) return "No app checkpoint history found.";
 
   const checkpointsByDate = groupCheckpointsByDate(checkpoints);
   const tree: TreeLeaf[] = Object.entries(checkpointsByDate)
