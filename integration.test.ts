@@ -24,15 +24,14 @@ class WebHostService {
 
 // Mock provider with realistic implementation
 function createMockProvider(): AgentCheckpointStorage {
-  const checkpoints = new Map<string, any>();
+  const checkpoints = new Map<number, any>();
+  let nextId = 1;
 
   return {
     displayName: "Mock Provider",
-    start: async () => {
-    },
 
     storeAgentCheckpoint: async (data) => {
-      const id = `checkpoint-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const id = nextId++;
       const checkpoint = {
         id,
         ...data,
@@ -43,14 +42,16 @@ function createMockProvider(): AgentCheckpointStorage {
     },
 
     retrieveAgentCheckpoint: async (id) => {
-      return checkpoints.get(id) || null;
+      return checkpoints.get(id) ?? null;
     },
 
     listAgentCheckpoints: async () => {
       return Array.from(checkpoints.values()).map(cp => ({
         id: cp.id,
         name: cp.name,
+        sessionId: cp.sessionId,
         agentId: cp.agentId,
+        agentType: cp.agentType,
         createdAt: cp.createdAt
       }));
     }
@@ -69,7 +70,7 @@ describe("Checkpoint Integration", () => {
     app = createTestingApp();
     checkpointService = new AgentCheckpointService(app, {});
     checkpointService.setCheckpointProvider(createMockProvider());
-    agentCommandService = new AgentCommandService();
+    agentCommandService = new AgentCommandService(app);
 
     app.addServices(checkpointService, agentCommandService, new WebHostService());
 
@@ -88,12 +89,12 @@ describe("Checkpoint Integration", () => {
       // 1. Save checkpoint
       const checkpointId = await checkpointService.saveAgentCheckpoint("Integration Test", agent);
       expect(checkpointId).toBeDefined();
-      expect(checkpointId).toMatch(/^checkpoint-\d+-.+$/);
+      expect(checkpointId).toEqual(expect.any(Number));
 
       // 2. List checkpoints
       const checkpoints = await checkpointService.listAgentCheckpoints();
       expect(checkpoints).toHaveLength(1);
-      expect(checkpoints[0].name).toBe("Integration Test");
+      expect(checkpoints[0]!.name).toBe("Integration Test");
 
       // 3. Restore checkpoint
       await checkpointService.restoreAgentCheckpoint(checkpointId, agent);
@@ -119,11 +120,11 @@ describe("Checkpoint Integration", () => {
 
   describe("Command Integration", () => {
     it("should execute checkpoint create command", async () => {
-      const result = await createCheckpointCommand.execute({ remainder: "Integration Test Command", agent });
+      const result = await createCheckpointCommand.execute({ args: {}, remainder: "Integration Test Command", agent });
 
       const checkpoints = await checkpointService.listAgentCheckpoints();
       expect(checkpoints).toHaveLength(1);
-      expect(checkpoints[0].name).toBe("Integration Test Command");
+      expect(checkpoints[0]!.name).toBe("Integration Test Command");
       expect(result).toContain("Checkpoint created");
     });
 
@@ -132,7 +133,7 @@ describe("Checkpoint Integration", () => {
       const emptyProvider = createMockProvider();
       checkpointService.setCheckpointProvider(emptyProvider);
 
-      const result = await listCheckpointCommand.execute({ agent });
+      const result = await listCheckpointCommand.execute({ args: {}, agent });
 
       expect(result).toBe("No checkpoints saved. Use /agent checkpoint create to make one.");
     });
@@ -141,7 +142,7 @@ describe("Checkpoint Integration", () => {
       const checkpointId = await checkpointService.saveAgentCheckpoint("Restore Test", agent);
 
       vi.spyOn(agent, "restoreState").mockReturnValue();
-      const result = await restoreCheckpointCommand.execute({ positionals: { checkpointId }, agent });
+      const result = await restoreCheckpointCommand.execute({ args: {}, positionals: { checkpointId: String(checkpointId) }, agent });
 
       expect(result).toBe(`Checkpoint ${checkpointId} loaded`);
       expect(agent.restoreState).toHaveBeenCalled();
@@ -183,20 +184,22 @@ describe("Checkpoint Integration", () => {
 
       const result = await checkpointRPC.methods.listCheckpoints.execute({}, app);
       expect(result).toHaveLength(1);
-      expect(result[0].name).toBe("RPC Test");
+      expect(result[0]!.name).toBe("RPC Test");
     });
 
     it("should get checkpoint via RPC", async () => {
       const checkpointId = await checkpointService.saveAgentCheckpoint("Get Test", agent);
 
       const result = await checkpointRPC.methods.getCheckpoint.execute({ id: checkpointId }, app);
-      expect(result).not.toBeNull();
-      expect(result?.name).toBe("Get Test");
+      expect(result.status).toBe("success");
+      if (result.status === "success") {
+        expect(result.checkpoint?.name).toBe("Get Test");
+      }
     });
 
     it("should handle RPC when checkpoint not found", async () => {
-      const result = await checkpointRPC.methods.getCheckpoint.execute({ id: "non-existent-id" }, app);
-      expect(result).toBeNull();
+      const result = await checkpointRPC.methods.getCheckpoint.execute({ id: 999999 }, app);
+      expect(result).toEqual({ status: "checkpointNotFound" });
     });
   });
 
@@ -217,7 +220,7 @@ describe("Checkpoint Integration", () => {
 
   describe("Performance Integration", () => {
     it("should handle concurrent operations", async () => {
-      const promises: Array<Promise<string>> = [
+      const promises: Array<Promise<number>> = [
         checkpointService.saveAgentCheckpoint("Concurrent 1", agent),
         checkpointService.saveAgentCheckpoint("Concurrent 2", agent),
         checkpointService.saveAgentCheckpoint("Concurrent 3", agent)

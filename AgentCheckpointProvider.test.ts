@@ -62,10 +62,11 @@ describe("AgentCheckpointProvider Interface", () => {
     it("should handle NamedAgentCheckpoint correctly", () => {
       const checkpoint: NamedAgentCheckpoint = {
         name: "Test Checkpoint",
-        state: { testState: "test" },
-        agentType: "test-agent-type",
+        agentId: "test-agent-id",
         sessionId: "test-session",
-        previousResponseId: "test-response-id"
+        createdAt: Date.now(),
+        agentType: "test-agent-type",
+        state: { testState: "test" },
       };
 
       expect(checkpoint).toMatchObject({
@@ -78,7 +79,7 @@ describe("AgentCheckpointProvider Interface", () => {
 
     it("should handle StoredAgentCheckpoint correctly", () => {
       const storedCheckpoint: StoredAgentCheckpoint = {
-        id: "test-id",
+        id: 123,
         name: "Test Checkpoint",
         agentId: "test-agent-id",
         createdAt: Date.now(),
@@ -88,7 +89,7 @@ describe("AgentCheckpointProvider Interface", () => {
       };
 
       expect(storedCheckpoint).toMatchObject({
-        id: expect.any(String),
+        id: expect.any(Number),
         name: expect.any(String),
         agentId: expect.any(String),
         createdAt: expect.any(Number),
@@ -100,14 +101,16 @@ describe("AgentCheckpointProvider Interface", () => {
 
     it("should handle AgentCheckpointListItem correctly", () => {
       const listItem: AgentCheckpointListItem = {
-        id: "test-id",
+        id: 123,
         name: "Test Checkpoint",
         agentId: "test-agent-id",
+        sessionId: "test-session",
+        agentType: "test-agent-type",
         createdAt: Date.now()
       };
 
       expect(listItem).toMatchObject({
-        id: expect.any(String),
+        id: expect.any(Number),
         name: expect.any(String),
         agentId: expect.any(String),
         createdAt: expect.any(Number)
@@ -115,8 +118,7 @@ describe("AgentCheckpointProvider Interface", () => {
 
       // Should not have state, agentType, sessionId, or previousResponseId properties
       expect((listItem as any).state).toBeUndefined();
-      expect((listItem as any).agentType).toBeUndefined();
-      expect((listItem as any).sessionId).toBeUndefined();
+      expect((listItem as any).previousResponseId).toBeUndefined();
     });
   });
 
@@ -128,10 +130,11 @@ describe("AgentCheckpointProvider Interface", () => {
     it("should store checkpoint", async () => {
       const checkpointData: NamedAgentCheckpoint = {
         name: "Test Checkpoint",
-        state: { testState: "test" },
-        agentType: "test-agent-type",
+        agentId: "test-agent-id",
         sessionId: "test-session",
-        previousResponseId: "test-response-id"
+        createdAt: Date.now(),
+        agentType: "test-agent-type",
+        state: { testState: "test" },
       };
 
       const result = await provider.storeAgentCheckpoint(checkpointData);
@@ -141,7 +144,7 @@ describe("AgentCheckpointProvider Interface", () => {
     });
 
     it("should retrieve checkpoint", async () => {
-      const result = await provider.retrieveAgentCheckpoint("mock-checkpoint-id");
+      const result = await provider.retrieveAgentCheckpoint(1);
 
       expect(result).toMatchObject({
         id: "mock-checkpoint-id",
@@ -155,9 +158,9 @@ describe("AgentCheckpointProvider Interface", () => {
     });
 
     it("should return null when checkpoint not found", async () => {
-      provider.retrieveAgentCheckpoint.mockResolvedValueOnce(null);
+      vi.mocked(provider.retrieveAgentCheckpoint).mockResolvedValueOnce(null);
 
-      const result = await provider.retrieveAgentCheckpoint("non-existent-id");
+      const result = await provider.retrieveAgentCheckpoint(999);
 
       expect(result).toBeNull();
     });
@@ -177,14 +180,15 @@ describe("AgentCheckpointProvider Interface", () => {
 
   describe("Error Handling", () => {
     it("should handle storage errors", async () => {
-      provider.storeAgentCheckpoint.mockRejectedValueOnce(new Error("Storage failed"));
+      vi.mocked(provider.storeAgentCheckpoint).mockRejectedValueOnce(new Error("Storage failed"));
 
       const checkpointData: NamedAgentCheckpoint = {
         name: "Test Checkpoint",
-        state: { testState: "test" },
-        agentType: "test-agent-type",
+        agentId: "test-agent-id",
         sessionId: "test-session",
-        previousResponseId: "test-response-id"
+        createdAt: Date.now(),
+        agentType: "test-agent-type",
+        state: { testState: "test" },
       };
 
       await expect(provider.storeAgentCheckpoint(checkpointData))
@@ -192,14 +196,14 @@ describe("AgentCheckpointProvider Interface", () => {
     });
 
     it("should handle retrieval errors", async () => {
-      provider.retrieveAgentCheckpoint.mockRejectedValueOnce(new Error("Retrieval failed"));
+      vi.mocked(provider.retrieveAgentCheckpoint).mockRejectedValueOnce(new Error("Retrieval failed"));
 
-      await expect(provider.retrieveAgentCheckpoint("test-id"))
+      await expect(provider.retrieveAgentCheckpoint(123))
         .rejects.toThrow("Retrieval failed");
     });
 
     it("should handle listing errors", async () => {
-      provider.listAgentCheckpoints.mockRejectedValueOnce(new Error("Listing failed"));
+      vi.mocked(provider.listAgentCheckpoints).mockRejectedValueOnce(new Error("Listing failed"));
 
       await expect(provider.listAgentCheckpoints())
         .rejects.toThrow("Listing failed");
@@ -210,10 +214,11 @@ describe("AgentCheckpointProvider Interface", () => {
     it("should validate checkpoint data structure", () => {
       const validCheckpoint: NamedAgentCheckpoint = {
         name: "Valid Checkpoint",
-        state: { valid: true },
-        agentType: "valid-agent-type",
+        agentId: "valid-agent-id",
         sessionId: "valid-session",
-        previousResponseId: "valid-response-id"
+        createdAt: Date.now(),
+        agentType: "valid-agent-type",
+        state: { valid: true },
       };
 
       expect(validCheckpoint.name).toBeDefined();
@@ -225,10 +230,11 @@ describe("AgentCheckpointProvider Interface", () => {
     it("should handle empty state", () => {
       const minimalCheckpoint: NamedAgentCheckpoint = {
         name: "Minimal Checkpoint",
-        state: {},
-        agentType: "minimal-agent-type",
+        agentId: "minimal-agent-id",
         sessionId: "minimal-session",
-        previousResponseId: "minimal-response-id"
+        createdAt: Date.now(),
+        agentType: "minimal-agent-type",
+        state: {},
       };
 
       expect(minimalCheckpoint.state).toEqual({});
@@ -237,6 +243,10 @@ describe("AgentCheckpointProvider Interface", () => {
     it("should handle complex nested data", () => {
       const complexCheckpoint: NamedAgentCheckpoint = {
         name: "Complex Checkpoint",
+        agentId: "complex-agent-id",
+        sessionId: "complex-session",
+        createdAt: Date.now(),
+        agentType: "complex-agent-type",
         state: {
           nested: {
             deep: {
@@ -247,13 +257,11 @@ describe("AgentCheckpointProvider Interface", () => {
             nullValue: null
           }
         },
-        agentType: "complex-agent-type",
-        sessionId: "complex-session",
-        previousResponseId: "complex-response-id"
       };
 
-      expect(complexCheckpoint.state.nested.deep.value).toBe("deep-value");
-      expect(complexCheckpoint.state.nested.array).toEqual([1, 2, 3]);
+      const nested = complexCheckpoint.state.nested as { deep: { value: string }; array: number[] };
+      expect(nested.deep.value).toBe("deep-value");
+      expect(nested.array).toEqual([1, 2, 3]);
     });
   });
 });

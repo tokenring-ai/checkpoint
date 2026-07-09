@@ -87,7 +87,7 @@ describe("AgentCheckpointService", () => {
 
         expect(checkpointId).toBe("checkpoint-id-123");
         expect(mockProvider.storeAgentCheckpoint).toHaveBeenCalled();
-        const callArgs = mockProvider.storeAgentCheckpoint.mock.calls[0][0];
+        const callArgs = vi.mocked(mockProvider.storeAgentCheckpoint).mock.calls[0]![0];
         expect(callArgs.name).toBe("Test Checkpoint");
         expect(callArgs.agentId).toBe(mockAgent.id);
         expect(callArgs).toHaveProperty("state");
@@ -104,23 +104,23 @@ describe("AgentCheckpointService", () => {
     describe("restoreAgentCheckpoint", () => {
       it("should restore checkpoint successfully", async () => {
         vi.spyOn(mockAgent, "restoreState").mockReturnValue();
-        await service.restoreAgentCheckpoint("checkpoint-id-123", mockAgent);
+        await service.restoreAgentCheckpoint(123, mockAgent);
 
-        expect(mockProvider.retrieveAgentCheckpoint).toHaveBeenCalledWith("checkpoint-id-123");
+        expect(mockProvider.retrieveAgentCheckpoint).toHaveBeenCalledWith(123);
         expect(mockAgent.restoreState).toHaveBeenCalledWith({ testState: "mocked" });
       });
 
       it("should throw error when checkpoint not found", async () => {
-        mockProvider.retrieveAgentCheckpoint.mockResolvedValueOnce(null);
+        vi.mocked(mockProvider.retrieveAgentCheckpoint).mockResolvedValueOnce(null);
 
-        await expect(service.restoreAgentCheckpoint("non-existent", mockAgent))
-          .rejects.toThrow("Checkpoint non-existent not found");
+        await expect(service.restoreAgentCheckpoint(999, mockAgent))
+          .rejects.toThrow("Checkpoint 999 not found");
       });
 
       it("should throw error when no provider is registered", async () => {
         const serviceWithoutProvider = new AgentCheckpointService(mockApp, {});
 
-        await expect(serviceWithoutProvider.restoreAgentCheckpoint("test-id", mockAgent))
+        await expect(serviceWithoutProvider.restoreAgentCheckpoint(123, mockAgent))
           .rejects.toThrow("No checkpoint provider is registered");
       });
     });
@@ -148,9 +148,9 @@ describe("AgentCheckpointService", () => {
 
     describe("retrieveAgentCheckpoint", () => {
       it("should retrieve checkpoint successfully", async () => {
-        const checkpoint = await service.retrieveAgentCheckpoint("checkpoint-id-123");
+        const checkpoint = await service.retrieveAgentCheckpoint(123);
 
-        expect(mockProvider.retrieveAgentCheckpoint).toHaveBeenCalledWith("checkpoint-id-123");
+        expect(mockProvider.retrieveAgentCheckpoint).toHaveBeenCalledWith(123);
         expect(checkpoint).toMatchObject({
           id: "checkpoint-id-123",
           name: "Test Checkpoint",
@@ -161,7 +161,7 @@ describe("AgentCheckpointService", () => {
       it("should throw error when no provider is registered", async () => {
         const serviceWithoutProvider = new AgentCheckpointService(mockApp, {});
 
-        await expect(serviceWithoutProvider.retrieveAgentCheckpoint("test-id"))
+        await expect(serviceWithoutProvider.retrieveAgentCheckpoint(123))
           .rejects.toThrow("No checkpoint provider is registered");
       });
     });
