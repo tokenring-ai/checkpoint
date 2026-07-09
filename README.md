@@ -25,6 +25,17 @@ bun install
 bun run build
 ```
 
+## Features
+
+- Create, list, and restore agent checkpoints with optional labels
+- Create, list, and restore app-level checkpoints for full session recovery
+- Auto-checkpointing hook that saves state after each agent input
+- Interactive tree browser for selecting checkpoints by date or agent
+- JSON-RPC endpoints for remote checkpoint management and agent spawning
+- Configurable storage backends via `AgentCheckpointStorage` and `AppCheckpointStorage` interfaces
+- Automatic state restoration on app startup when `restorePreviousState` is enabled
+- Automatic checkpoint save on app shutdown
+
 ## Chat Commands
 
 ### Agent Checkpoint Commands
@@ -214,13 +225,16 @@ interface AgentCheckpointStorage {
   displayName: string;
 
   // Save checkpoint and return its ID (number)
-  storeAgentCheckpoint(data: NamedAgentCheckpoint): Promise<number>;
+  // Note: Returns MaybePromise<number>, allowing synchronous implementations
+  storeAgentCheckpoint(data: NamedAgentCheckpoint): MaybePromise<number>;
 
   // Retrieve checkpoint by ID (number)
-  retrieveAgentCheckpoint(id: number): Promise<StoredAgentCheckpoint | null>;
+  // Note: Returns MaybePromise, allowing synchronous implementations
+  retrieveAgentCheckpoint(id: number): MaybePromise<StoredAgentCheckpoint | null>;
 
   // List all stored checkpoints (without state data)
-  listAgentCheckpoints(): Promise<AgentCheckpointListItem[]>;
+  // Note: Returns MaybePromise, allowing synchronous implementations
+  listAgentCheckpoints(): MaybePromise<AgentCheckpointListItem[]>;
 }
 ```
 
@@ -251,7 +265,94 @@ interface AppCheckpointStorage {
 }
 ```
 
-### Data Structures
+## Schema Definitions
+
+The package defines several Zod schemas for type-safe checkpoint data handling.
+
+### Agent Checkpoint Schemas
+
+**File:** `AgentCheckpointStorage.ts`
+
+```typescript
+import {
+  NamedAgentCheckpointSchema,
+  StoredAgentCheckpointSchema,
+  AgentCheckpointListItemSchema
+} from '@tokenring-ai/checkpoint/AgentCheckpointStorage';
+```
+
+#### `NamedAgentCheckpointSchema`
+
+Extends `AgentCheckpointSchema` from `@tokenring-ai/agent/types` with a `name` field. Used when storing a new checkpoint.
+
+- `name`: string - the checkpoint label
+
+#### `StoredAgentCheckpointSchema`
+
+Extends `NamedAgentCheckpointSchema` with an `id` field. Represents a checkpoint persisted in storage.
+
+- `id`: number - the storage-assigned checkpoint ID
+
+#### `AgentCheckpointListItemSchema`
+
+A picked subset of `StoredAgentCheckpointSchema` containing only listing fields (no state data). Used for efficient checkpoint listing.
+
+- `id`: number
+- `sessionId`: string
+- `name`: string
+- `agentId`: string
+- `agentType`: string
+- `createdAt`: number (timestamp)
+
+### App Checkpoint Schemas
+
+**File:** `AppCheckpointStorage.ts`
+
+```typescript
+import {
+  StoredAppCheckpointSchema,
+  AppCheckpointListItemSchema
+} from '@tokenring-ai/checkpoint/AppCheckpointStorage';
+```
+
+#### `StoredAppCheckpointSchema`
+
+Extends `AppSessionCheckpointSchema` from `@tokenring-ai/app/schema` with an `id` field. Represents a persisted app checkpoint.
+
+- `id`: number - the storage-assigned checkpoint ID
+
+#### `AppCheckpointListItemSchema`
+
+A picked subset of `StoredAppCheckpointSchema` containing only listing fields (no state data).
+
+- `id`: number
+- `sessionId`: string
+- `hostname`: string
+- `projectDirectory`: string
+- `createdAt`: number (timestamp)
+
+### RPC Schema
+
+**File:** `rpc/schema.ts`
+
+```typescript
+import { CheckpointNotFoundSchema } from '@tokenring-ai/checkpoint/rpc/schema';
+```
+
+#### `CheckpointNotFoundSchema`
+
+Used as the error response variant in discriminated unions for `getCheckpoint` and `launchAgentFromCheckpoint` RPC methods.
+
+```typescript
+// Response when a checkpoint is not found
+{
+  status: "checkpointNotFound"
+}
+```
+
+Both `getCheckpoint` and `launchAgentFromCheckpoint` use discriminated unions on the `status` field, returning either a success response or `CheckpointNotFoundSchema`.
+
+## Data Structures
 
 **Agent Checkpoint Types:**
 
@@ -308,123 +409,7 @@ The `AgentCheckpointData` (from `@tokenring-ai/agent/types`) includes:
 - `config` - Agent configuration
 - `previousResponseId` - ID of the previous response
 
-
-
-## Providers
-
-### AgentCheckpointStorage Interface
-
-Interface for implementing custom agent checkpoint storage backends.
-
-**Required Properties:**
-
-#### `displayName: string` (Agent Provider)
-
-Display name for the storage provider.
-
-```typescript
-class MyProvider implements AgentCheckpointStorage {
-  displayName = "My Custom Provider";
-  // ... other methods
-}
-```
-
-**Required Methods:**
-
-#### `storeAgentCheckpoint(data: NamedAgentCheckpoint): Promise<number>`
-
-Stores a checkpoint and returns its numeric ID.
-
-```typescript
-async storeAgentCheckpoint(data: NamedAgentCheckpoint): Promise<number> {
-  const id = Date.now(); // Use timestamp as numeric ID
-  // Store data with id and createdAt...
-  return id;
-}
-```
-
-#### `retrieveAgentCheckpoint(id: number): Promise<StoredAgentCheckpoint | null>`
-
-Retrieves a checkpoint by ID.
-
-```typescript
-async retrieveAgentCheckpoint(id: number): Promise<StoredAgentCheckpoint | null> {
-  // Retrieve and return checkpoint with full state or null
-}
-```
-
-#### `listAgentCheckpoints(): Promise<AgentCheckpointListItem[]>`
-
-Lists all stored checkpoints (without state data).
-
-```typescript
-async listAgentCheckpoints(): Promise<AgentCheckpointListItem[]> {
-  // Return array of checkpoint list items (id, name, agentId, createdAt)
-}
-```
-
-### AppCheckpointStorage Interface
-
-Interface for implementing custom app checkpoint storage backends.
-
-**Required Properties:**
-
-#### `displayName: string` (App Provider)
-
-Display name for the storage provider.
-
-```typescript
-class MyProvider implements AppCheckpointStorage {
-  displayName = "My Custom Provider";
-  // ... other methods
-}
-```
-
-**Required Methods:**
-
-#### `storeAppCheckpoint(data: AppSessionCheckpoint): Promise<number>`
-
-Stores a checkpoint and returns its numeric ID.
-
-```typescript
-async storeAppCheckpoint(data: AppSessionCheckpoint): Promise<number> {
-  const id = Date.now(); // Use timestamp as numeric ID
-  // Store data with id and createdAt...
-  return id;
-}
-```
-
-#### `retrieveAppCheckpoint(id: number): Promise<StoredAppCheckpoint | null>`
-
-Retrieves a checkpoint by ID.
-
-```typescript
-async retrieveAppCheckpoint(id: number): Promise<StoredAppCheckpoint | null> {
-  // Retrieve and return checkpoint with full state or null
-}
-```
-
-#### `listAppCheckpoints(): Promise<AppSessionListItem[]>`
-
-Lists all stored checkpoints (without state data).
-
-```typescript
-async listAppCheckpoints(): Promise<AppSessionListItem[]> {
-  // Return array of checkpoint list items
-}
-```
-
-#### `retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null>`
-
-Retrieves the most recent checkpoint.
-
-```typescript
-async retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null> {
-  // Return the most recent checkpoint or null
-}
-```
-
-### Provider Registration
+## Provider Registration
 
 Set the checkpoint provider using `setCheckpointProvider`:
 
@@ -597,6 +582,8 @@ Create a new agent from a checkpoint.
   "agentType": "default"
 }
 ```
+
+**Note:** The `agentType` field may be absent if the agent configuration does not define one.
 
 **Response (Not Found):**
 
