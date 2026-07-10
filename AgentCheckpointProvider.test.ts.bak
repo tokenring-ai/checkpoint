@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import type { AgentCheckpointListItem, AgentCheckpointStorage, NamedAgentCheckpoint, StoredAgentCheckpoint } from "./AgentCheckpointStorage.ts";
+import { afterEach,beforeEach,describe,expect,it,mock } from "bun:test";
 
 describe("AgentCheckpointProvider Interface", () => {
   let provider: AgentCheckpointStorage & {
@@ -11,9 +11,9 @@ describe("AgentCheckpointProvider Interface", () => {
     provider = {
       displayName: "Mock Provider",
       start: mock().mockResolvedValue(undefined),
-      storeAgentCheckpoint: mock().mockResolvedValue(1234),
+      storeAgentCheckpoint: mock().mockResolvedValue("mock-checkpoint-id"),
       retrieveAgentCheckpoint: mock().mockResolvedValue({
-        id: 1234,
+        id: "mock-checkpoint-id",
         name: "Mock Checkpoint",
         agentId: "mock-agent-id",
         createdAt: Date.now(),
@@ -23,12 +23,12 @@ describe("AgentCheckpointProvider Interface", () => {
       }),
       listAgentCheckpoints: mock().mockResolvedValue([
         {
-          id: 1234,
+          id: "mock-checkpoint-id",
           name: "Mock Checkpoint",
           agentId: "mock-agent-id",
-          createdAt: Date.now(),
-        },
-      ]),
+          createdAt: Date.now()
+        }
+      ])
     };
   });
 
@@ -106,14 +106,14 @@ describe("AgentCheckpointProvider Interface", () => {
         agentId: "test-agent-id",
         sessionId: "test-session",
         agentType: "test-agent-type",
-        createdAt: Date.now(),
+        createdAt: Date.now()
       };
 
       expect(listItem).toMatchObject({
         id: expect.any(Number),
         name: expect.any(String),
         agentId: expect.any(String),
-        createdAt: expect.any(Number),
+        createdAt: expect.any(Number)
       });
 
       // Should not have state, agentType, sessionId, or previousResponseId properties
@@ -124,7 +124,7 @@ describe("AgentCheckpointProvider Interface", () => {
 
   describe("Provider Operations", () => {
     it("should start successfully", async () => {
-      await expect(provider.start()).resolves.toBeUndefined();
+      await expect(provider.start()).resolves.not.toThrow();
     });
 
     it("should store checkpoint", async () => {
@@ -139,7 +139,7 @@ describe("AgentCheckpointProvider Interface", () => {
 
       const result = await provider.storeAgentCheckpoint(checkpointData);
 
-      expect(result).toBe(1234);
+      expect(result).toBe("mock-checkpoint-id");
       expect(provider.storeAgentCheckpoint).toHaveBeenCalledWith(checkpointData);
     });
 
@@ -147,7 +147,7 @@ describe("AgentCheckpointProvider Interface", () => {
       const result = await provider.retrieveAgentCheckpoint(1);
 
       expect(result).toMatchObject({
-        id: 1234,
+        id: "mock-checkpoint-id",
         name: expect.any(String),
         agentId: expect.any(String),
         createdAt: expect.any(Number),
@@ -158,7 +158,7 @@ describe("AgentCheckpointProvider Interface", () => {
     });
 
     it("should return null when checkpoint not found", async () => {
-      (provider.retrieveAgentCheckpoint as ReturnType<typeof mock>).mockResolvedValueOnce(null);
+      provider.retrieveAgentCheckpoint.mockResolvedValueOnce(null);
 
       const result = await provider.retrieveAgentCheckpoint(999);
 
@@ -170,17 +170,17 @@ describe("AgentCheckpointProvider Interface", () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        id: expect.any(Number),
+        id: expect.any(String),
         name: expect.any(String),
         agentId: expect.any(String),
-        createdAt: expect.any(Number),
+        createdAt: expect.any(Number)
       });
     });
   });
 
   describe("Error Handling", () => {
     it("should handle storage errors", async () => {
-      (provider.storeAgentCheckpoint as ReturnType<typeof mock>).mockRejectedValueOnce(new Error("Storage failed"));
+      provider.storeAgentCheckpoint.mockRejectedValueOnce(new Error("Storage failed"));
 
       const checkpointData: NamedAgentCheckpoint = {
         name: "Test Checkpoint",
@@ -191,19 +191,22 @@ describe("AgentCheckpointProvider Interface", () => {
         state: { testState: "test" },
       };
 
-      expect(provider.storeAgentCheckpoint(checkpointData)).rejects.toThrow("Storage failed");
+      await expect(provider.storeAgentCheckpoint(checkpointData))
+        .rejects.toThrow("Storage failed");
     });
 
     it("should handle retrieval errors", async () => {
-      (provider.retrieveAgentCheckpoint as ReturnType<typeof mock>).mockRejectedValueOnce(new Error("Retrieval failed"));
+      provider.retrieveAgentCheckpoint.mockRejectedValueOnce(new Error("Retrieval failed"));
 
-      expect(provider.retrieveAgentCheckpoint(123)).rejects.toThrow("Retrieval failed");
+      await expect(provider.retrieveAgentCheckpoint(123))
+        .rejects.toThrow("Retrieval failed");
     });
 
     it("should handle listing errors", async () => {
-      (provider.listAgentCheckpoints as ReturnType<typeof mock>).mockRejectedValueOnce(new Error("Listing failed"));
+      provider.listAgentCheckpoints.mockRejectedValueOnce(new Error("Listing failed"));
 
-      expect(provider.listAgentCheckpoints()).rejects.toThrow("Listing failed");
+      await expect(provider.listAgentCheckpoints())
+        .rejects.toThrow("Listing failed");
     });
   });
 
@@ -247,12 +250,12 @@ describe("AgentCheckpointProvider Interface", () => {
         state: {
           nested: {
             deep: {
-              value: "deep-value",
+              value: "deep-value"
             },
             array: [1, 2, 3],
             boolean: true,
-            nullValue: null,
-          },
+            nullValue: null
+          }
         },
       };
 

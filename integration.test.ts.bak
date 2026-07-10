@@ -1,7 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-import { type Agent, AgentCommandService } from "@tokenring-ai/agent";
+import { Agent, AgentCommandService } from "@tokenring-ai/agent";
+import { afterEach,beforeEach,describe,expect,it,mock,spyOn } from "bun:test";
 import createTestingAgent from "@tokenring-ai/agent/test/createTestingAgent.test";
-import type TokenRingApp from "@tokenring-ai/app";
+import TokenRingApp from "@tokenring-ai/app";
 import createTestingApp from "@tokenring-ai/app/test/createTestingApp.test";
 import { AfterAgentInputHandled } from "@tokenring-ai/lifecycle/util/hooks";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
@@ -13,8 +13,8 @@ import restoreCheckpointCommand from "./commands/agent-checkpoint/restore.ts";
 import autoCheckpointHook from "./hooks/autoCheckpoint.ts";
 import checkpointRPC from "./rpc/checkpoint.ts";
 
-void mock.module("@tokenring-ai/web-host", () => ({}));
-void mock.module("@tokenring-ai/web-host/JsonRpcResource", () => ({}));
+mock.module("@tokenring-ai/web-host");
+mock.module("@tokenring-ai/web-host/JsonRpcResource");
 
 class WebHostService {
   static registerResource = mock();
@@ -30,18 +30,18 @@ function createMockProvider(): AgentCheckpointStorage {
   return {
     displayName: "Mock Provider",
 
-    storeAgentCheckpoint: async data => {
+    storeAgentCheckpoint: async (data) => {
       const id = nextId++;
       const checkpoint = {
         id,
         ...data,
-        createdAt: Date.now(),
+        createdAt: Date.now()
       };
       checkpoints.set(id, checkpoint);
       return id;
     },
 
-    retrieveAgentCheckpoint: async id => {
+    retrieveAgentCheckpoint: async (id) => {
       return checkpoints.get(id) ?? null;
     },
 
@@ -52,9 +52,9 @@ function createMockProvider(): AgentCheckpointStorage {
         sessionId: cp.sessionId,
         agentId: cp.agentId,
         agentType: cp.agentType,
-        createdAt: cp.createdAt,
+        createdAt: cp.createdAt
       }));
-    },
+    }
   } satisfies AgentCheckpointStorage;
 }
 
@@ -223,7 +223,7 @@ describe("Checkpoint Integration", () => {
       const promises: Array<Promise<number>> = [
         checkpointService.saveAgentCheckpoint("Concurrent 1", agent),
         checkpointService.saveAgentCheckpoint("Concurrent 2", agent),
-        checkpointService.saveAgentCheckpoint("Concurrent 3", agent),
+        checkpointService.saveAgentCheckpoint("Concurrent 3", agent)
       ];
 
       const ids = await Promise.all(promises);
@@ -239,6 +239,7 @@ describe("Checkpoint Integration", () => {
         await checkpointService.saveAgentCheckpoint(`Performance Test ${i}`, agent);
       }
 
+      const listTime = Date.now();
       const checkpoints = await checkpointService.listAgentCheckpoints();
       const endTime = Date.now();
 

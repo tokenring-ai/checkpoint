@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import type { TokenRingAgentCommand } from "@tokenring-ai/agent/types";
+import { TokenRingAgentCommand } from "@tokenring-ai/agent/types";
+import { afterEach,beforeEach,describe,expect,it,mock } from "bun:test";
 import createCheckpointCommand from "./agent-checkpoint/create.ts";
 import listCheckpointCommand from "./agent-checkpoint/list.ts";
 import restoreCheckpointCommand from "./agent-checkpoint/restore.ts";
@@ -9,7 +9,7 @@ const mockAgent = {
   generateCheckpoint: mock().mockReturnValue({
     state: { testState: "mocked" },
     config: { testConfig: "mocked" },
-    previousResponseId: "test-response-id",
+    previousResponseId: "test-response-id"
   }),
   restoreState: mock(),
   requireServiceByType: mock(),
@@ -19,7 +19,7 @@ const mockAgent = {
   askQuestion: mock(),
   id: "test-agent-id",
   name: "test-agent",
-  config: { type: "test-agent-type" },
+  config: { type: "test-agent-type" }
 } as any;
 
 const mockCheckpointService = {
@@ -30,15 +30,15 @@ const mockCheckpointService = {
       id: 1,
       name: "Test Checkpoint 1",
       agentId: "test-agent-id",
-      createdAt: Date.now() - 1000,
+      createdAt: Date.now() - 1000
     },
     {
       id: 2,
       name: "Test Checkpoint 2",
       agentId: "test-agent-id",
-      createdAt: Date.now(),
-    },
-  ]),
+      createdAt: Date.now()
+    }
+  ])
 };
 
 describe("Checkpoint Commands", () => {
@@ -100,7 +100,7 @@ describe("Checkpoint Commands", () => {
         const error = new Error("Service error");
         mockCheckpointService.saveAgentCheckpoint.mockRejectedValueOnce(error);
 
-        expect(createCheckpointCommand.execute({ args: {}, remainder: "Test", agent: mockAgent })).rejects.toThrow("Service error");
+        await expect(createCheckpointCommand.execute({ args: {}, remainder: "Test", agent: mockAgent })).rejects.toThrow("Service error");
       });
     });
   });
@@ -140,7 +140,7 @@ describe("Checkpoint Commands", () => {
         const error = new Error("Restore failed");
         mockCheckpointService.restoreAgentCheckpoint.mockRejectedValueOnce(error);
 
-        expect(restoreCheckpointCommand.execute({ args: {}, positionals: { checkpointId: "999" }, agent: mockAgent })).rejects.toThrow("Restore failed");
+        await expect(restoreCheckpointCommand.execute({ args: {}, positionals: { checkpointId: "999" }, agent: mockAgent })).rejects.toThrow("Restore failed");
       });
     });
   });
@@ -203,7 +203,7 @@ describe("Checkpoint Commands", () => {
         const error = new Error("Tree selection failed");
         mockAgent.askQuestion.mockRejectedValueOnce(error);
 
-        await expect(listCheckpointCommand.execute({ args: {}, agent: mockAgent })).rejects.toThrow("Error during checkpoint selection");
+        await expect(listCheckpointCommand.execute({ args: {}, agent: mockAgent })).rejects.toThrow("Error during checkpoint selection: Error: Tree selection failed");
       });
     });
 
@@ -212,7 +212,7 @@ describe("Checkpoint Commands", () => {
         const error = new Error("List failed");
         mockCheckpointService.listAgentCheckpoints.mockRejectedValueOnce(error);
 
-        expect(listCheckpointCommand.execute({ args: {}, agent: mockAgent })).rejects.toThrow("List failed");
+        await expect(listCheckpointCommand.execute({ args: {}, agent: mockAgent })).rejects.toThrow("List failed");
       });
     });
   });
