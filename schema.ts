@@ -8,7 +8,10 @@ export const AppCheckpointServiceSchema = z.object({
     .default(false)
     .meta({ description: "Restore the most recent checkpoint automatically on startup" } satisfies ConfigFieldMeta),
   projectDirectory: z.string().meta({ hidden: true } satisfies ConfigFieldMeta), // injected from --projectDirectory at launch
-  hostname: z.string().default(hostname()).meta({ hidden: true } satisfies ConfigFieldMeta), // injected from os.hostname()
+  hostname: z
+    .string()
+    .default(hostname())
+    .meta({ hidden: true } satisfies ConfigFieldMeta), // injected from os.hostname()
 });
 
 export type ParsedAppCheckpointConfig = z.output<typeof AppCheckpointServiceSchema>;
