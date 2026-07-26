@@ -4,6 +4,7 @@ import createTestingAgent from "@tokenring-ai/agent/test/createTestingAgent.test
 import type TokenRingApp from "@tokenring-ai/app";
 import createTestingApp from "@tokenring-ai/app/test/createTestingApp.test";
 import { AfterAgentInputHandled } from "@tokenring-ai/lifecycle/util/hooks";
+import EnhancedMap from "@tokenring-ai/utility/map/enhancedMap";
 import AgentCheckpointService from "./AgentCheckpointService.ts";
 import type { AgentCheckpointStorage } from "./AgentCheckpointStorage.ts";
 import createCheckpointCommand from "./commands/agent-checkpoint/create.ts";
@@ -24,7 +25,7 @@ class WebHostService {
 
 // Mock provider with realistic implementation
 function createMockProvider(): AgentCheckpointStorage {
-  const checkpoints = new Map<number, any>();
+  const checkpoints = new EnhancedMap<number, any>();
   let nextId = 1;
 
   return {
@@ -46,7 +47,7 @@ function createMockProvider(): AgentCheckpointStorage {
     },
 
     listAgentCheckpoints: async () => {
-      return Array.from(checkpoints.values()).map(cp => ({
+      return checkpoints.mapValues(cp => ({
         id: cp.id,
         name: cp.name,
         sessionId: cp.sessionId,
