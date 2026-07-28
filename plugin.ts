@@ -21,18 +21,19 @@ export default {
   displayName: "Checkpoint Service",
   version: packageJSON.version,
   description: packageJSON.description,
-  install(app, config) {
-    const agentCheckpointService = new AgentCheckpointService(app, config.checkpoint.agent);
-    app.addServices(agentCheckpointService);
-
-    const appCheckpointService = new AppCheckpointService(app, config.checkpoint.app);
-    app.addServices(appCheckpointService);
+  install(app) {
+    app.addServices(new AgentCheckpointService(app));
+    app.addServices(new AppCheckpointService(app));
 
     app.waitForService(AgentCommandService, agentCommandService => agentCommandService.addAgentCommands(agentCommands));
     app.waitForService(AgentLifecycleService, lifecycleService => lifecycleService.addHooks(autoCheckpoint));
     app.waitForService(RpcService, rpcService => {
       rpcService.registerEndpoint(checkpointRPC);
     });
+  },
+  reconfigure(app, config) {
+    app.requireService(AgentCheckpointService).reconfigure(config.checkpoint.agent);
+    app.requireService(AppCheckpointService).reconfigure(config.checkpoint.app);
   },
   configSchema: packageConfigSchema,
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;

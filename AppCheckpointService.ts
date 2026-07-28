@@ -12,16 +12,23 @@ export default class AppCheckpointService implements TokenRingService {
 
   checkpointProvider: AppCheckpointStorage | null = null;
 
+  private options: ParsedAppCheckpointConfig | undefined;
+
   constructor(
     readonly app: TokenRingApp,
-    readonly options: ParsedAppCheckpointConfig,
+    options?: ParsedAppCheckpointConfig,
   ) {
+    if (options) this.options = options;
     const agentManager = this.app.requireService(AgentManager);
     this.app.stateManager.initializeState(AppCheckpointState, agentManager);
   }
 
+  reconfigure(options: ParsedAppCheckpointConfig): void {
+    this.options = options;
+  }
+
   async start(): Promise<void> {
-    if (this.checkpointProvider && this.options.restorePreviousState) {
+    if (this.checkpointProvider && this.options?.restorePreviousState) {
       const checkpoint = await this.checkpointProvider.retrieveLatestAppCheckpoint();
       if (checkpoint) {
         this.app.restoreState(checkpoint.state);
@@ -44,6 +51,9 @@ export default class AppCheckpointService implements TokenRingService {
   async saveAppCheckpoint(): Promise<number> {
     if (!this.checkpointProvider) {
       throw new ConfigurationError(this.name, "No checkpoint provider is registered");
+    }
+    if (!this.options) {
+      throw new ConfigurationError(this.name, "App checkpoint service has not been configured");
     }
     return await this.checkpointProvider.storeAppCheckpoint({
       sessionId: this.app.sessionId,

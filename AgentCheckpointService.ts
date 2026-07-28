@@ -3,7 +3,7 @@ import type { AgentCreationContext } from "@tokenring-ai/agent/types";
 import type TokenRingApp from "@tokenring-ai/app";
 import type { TokenRingService } from "@tokenring-ai/app/types";
 import type { AgentCheckpointStorage } from "./AgentCheckpointStorage.ts";
-import type { ParsedAgentCheckpointConfig } from "./schema.ts";
+import { AgentCheckpointServiceSchema, type ParsedAgentCheckpointConfig } from "./schema.ts";
 
 export default class AgentCheckpointService implements TokenRingService {
   readonly name = "AgentCheckpointService";
@@ -11,10 +11,18 @@ export default class AgentCheckpointService implements TokenRingService {
 
   checkpointProvider: AgentCheckpointStorage | null = null;
 
+  private options = AgentCheckpointServiceSchema.parse({});
+
   constructor(
     readonly app: TokenRingApp,
-    readonly options: ParsedAgentCheckpointConfig,
-  ) {}
+    options?: ParsedAgentCheckpointConfig,
+  ) {
+    if (options) this.options = options;
+  }
+
+  reconfigure(options: ParsedAgentCheckpointConfig): void {
+    this.options = options;
+  }
 
   start(): void {
     if (!this.checkpointProvider) {
