@@ -11,8 +11,8 @@ const mockAgent = {
     previousResponseId: "test-response-id",
   }),
   restoreState: mock(),
-  requireServiceByType: mock(),
-  getServiceByType: mock(),
+  requireService: mock(),
+  getService: mock(),
   infoMessage: mock(),
   errorMessage: mock(),
   askQuestion: mock(),
@@ -30,7 +30,7 @@ describe("Auto-Checkpoint Hook", () => {
     mock.clearAllMocks();
 
     // Setup default mock behavior
-    mockAgent.getServiceByType.mockReturnValue(mockCheckpointService);
+    mockAgent.getService.mockReturnValue(mockCheckpointService);
   });
 
   afterEach(() => {
@@ -95,7 +95,7 @@ describe("Auto-Checkpoint Hook", () => {
 
   describe("Error Handling", () => {
     it("should handle missing checkpoint service gracefully", async () => {
-      mockAgent.getServiceByType.mockReturnValueOnce(null);
+      mockAgent.getService.mockReturnValueOnce(null);
 
       const message = "Test message";
 
@@ -125,7 +125,7 @@ describe("Auto-Checkpoint Hook", () => {
       const failingService = {
         saveAgentCheckpoint: mock().mockRejectedValue(new Error("Service not initialized")),
       };
-      mockAgent.getServiceByType.mockReturnValueOnce(failingService);
+      mockAgent.getService.mockReturnValueOnce(failingService);
 
       const message = "Test message";
 

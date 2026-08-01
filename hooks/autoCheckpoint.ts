@@ -8,7 +8,7 @@ const description = "Automatically saves agent checkpoints after input is handle
 
 const callbacks = [
   new HookCallback(AfterAgentInputHandled, async (data, agent): Promise<void> => {
-    const storage = agent.getServiceByType(AgentCheckpointService);
+    const storage = agent.getService(AgentCheckpointService);
     if (storage) {
       await storage.saveAgentCheckpoint(data.request.input.message, agent);
     }

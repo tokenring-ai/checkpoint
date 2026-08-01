@@ -5,7 +5,7 @@ import AppCheckpointService from "../../AppCheckpointService.ts";
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const checkpointService = agent.requireServiceByType(AppCheckpointService);
+  const checkpointService = agent.requireService(AppCheckpointService);
   const savedCheckpoints = await checkpointService.listAppCheckpoints();
   if (savedCheckpoints.length === 0) return "No checkpoints saved. Use /app checkpoint create to make one.";
 

@@ -48,7 +48,7 @@ async function displayCheckpointDetails(checkpointItem: AgentCheckpointListItem,
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const checkpointStorage = agent.requireServiceByType(AgentCheckpointService);
+  const checkpointStorage = agent.requireService(AgentCheckpointService);
   const checkpoints = await checkpointStorage.listAgentCheckpoints();
   if (!checkpoints.length) return "No checkpoint history found.";
 

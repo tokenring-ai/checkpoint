@@ -12,8 +12,8 @@ const mockAgent = {
     previousResponseId: "test-response-id",
   }),
   restoreState: mock(),
-  requireServiceByType: mock(),
-  getServiceByType: mock(),
+  requireService: mock(),
+  getService: mock(),
   infoMessage: mock(),
   errorMessage: mock(),
   askQuestion: mock(),
@@ -44,7 +44,7 @@ const mockCheckpointService = {
 describe("Checkpoint Commands", () => {
   beforeEach(() => {
     mock.clearAllMocks();
-    mockAgent.requireServiceByType.mockReturnValue(mockCheckpointService);
+    mockAgent.requireService.mockReturnValue(mockCheckpointService);
   });
 
   afterEach(() => {
@@ -121,14 +121,14 @@ describe("Checkpoint Commands", () => {
 
     describe("Command Execution", () => {
       it("should restore checkpoint with valid ID", async () => {
-        const result = await restoreCheckpointCommand.execute({ args: {}, positionals: { checkpointId: "1" }, agent: mockAgent });
+        const result = await restoreCheckpointCommand.execute({ args: { checkpointId: "1" }, agent: mockAgent });
 
         expect(mockCheckpointService.restoreAgentCheckpoint).toHaveBeenCalledWith(1, mockAgent);
         expect(result).toBe("Checkpoint 1 loaded");
       });
 
       it("should handle restore with complex ID", async () => {
-        const result = await restoreCheckpointCommand.execute({ args: {}, positionals: { checkpointId: "12345" }, agent: mockAgent });
+        const result = await restoreCheckpointCommand.execute({ args: { checkpointId: "12345" }, agent: mockAgent });
 
         expect(mockCheckpointService.restoreAgentCheckpoint).toHaveBeenCalledWith(12345, mockAgent);
         expect(result).toBe("Checkpoint 12345 loaded");
@@ -140,7 +140,7 @@ describe("Checkpoint Commands", () => {
         const error = new Error("Restore failed");
         mockCheckpointService.restoreAgentCheckpoint.mockRejectedValueOnce(error);
 
-        expect(restoreCheckpointCommand.execute({ args: {}, positionals: { checkpointId: "999" }, agent: mockAgent })).rejects.toThrow("Restore failed");
+        expect(restoreCheckpointCommand.execute({ args: { checkpointId: "999" }, agent: mockAgent })).rejects.toThrow("Restore failed");
       });
     });
   });

@@ -71,9 +71,9 @@ describe("Checkpoint Integration", () => {
     app = createTestingApp();
     checkpointService = new AgentCheckpointService(app, {});
     checkpointService.setCheckpointProvider(createMockProvider());
-    agentCommandService = new AgentCommandService(app);
+    agentCommandService = new AgentCommandService();
 
-    app.addServices(checkpointService, agentCommandService, new WebHostService());
+    app.addServices([checkpointService, agentCommandService, new WebHostService()]);
 
     agent = createTestingAgent(app);
     checkpointService.attach(agent, { items: [] });
@@ -143,7 +143,7 @@ describe("Checkpoint Integration", () => {
       const checkpointId = await checkpointService.saveAgentCheckpoint("Restore Test", agent);
 
       spyOn(agent, "restoreState").mockReturnValue();
-      const result = await restoreCheckpointCommand.execute({ args: {}, positionals: { checkpointId: String(checkpointId) }, agent });
+      const result = await restoreCheckpointCommand.execute({ args: { checkpointId: String(checkpointId) }, agent });
 
       expect(result).toBe(`Checkpoint ${checkpointId} loaded`);
       expect(agent.restoreState).toHaveBeenCalled();

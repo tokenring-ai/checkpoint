@@ -12,12 +12,12 @@ const inputSchema = {
   ],
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({ positionals: { checkpointId }, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({ args: { checkpointId }, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const id = Number(checkpointId);
   if (!Number.isInteger(id)) {
     throw new Error(`Invalid checkpoint ID: ${checkpointId}`);
   }
-  await agent.requireServiceByType(AgentCheckpointService).restoreAgentCheckpoint(id, agent);
+  await agent.requireService(AgentCheckpointService).restoreAgentCheckpoint(id, agent);
   return `Checkpoint ${id} loaded`;
 }
 

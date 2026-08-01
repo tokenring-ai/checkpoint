@@ -20,7 +20,7 @@ export default class AppCheckpointService implements TokenRingService {
   ) {
     if (options) this.options = options;
     const agentManager = this.app.requireService(AgentManager);
-    this.app.stateManager.initializeState(AppCheckpointState, agentManager);
+    this.app.initializeState(AppCheckpointState, agentManager);
   }
 
   reconfigure(options: ParsedAppCheckpointConfig): void {

@@ -22,8 +22,8 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app) {
-    app.addServices(new AgentCheckpointService(app));
-    app.addServices(new AppCheckpointService(app));
+    app.addService(new AgentCheckpointService(app));
+    app.addService(new AppCheckpointService(app));
 
     app.waitForService(AgentCommandService, agentCommandService => agentCommandService.addAgentCommands(agentCommands));
     app.waitForService(AgentLifecycleService, lifecycleService => lifecycleService.addHooks(autoCheckpoint));

@@ -12,7 +12,7 @@ const inputSchema = {
 
 async function execute({ remainder, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const label = remainder;
-  const checkpointId = await agent.requireServiceByType(AgentCheckpointService).saveAgentCheckpoint(label, agent);
+  const checkpointId = await agent.requireService(AgentCheckpointService).saveAgentCheckpoint(label, agent);
   return `Checkpoint created: ${checkpointId}: ${label}`;
 }
 

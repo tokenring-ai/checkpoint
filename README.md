@@ -147,7 +147,7 @@ Main service for agent checkpoint operations. Automatically installed when the p
 ```typescript
 import AgentCheckpointService from '@tokenring-ai/checkpoint/AgentCheckpointService';
 
-const checkpointService = agent.requireServiceByType(AgentCheckpointService);
+const checkpointService = agent.requireService(AgentCheckpointService);
 
 // Set checkpoint provider
 checkpointService.setCheckpointProvider(myProvider);
@@ -196,7 +196,7 @@ Service for application-level checkpoint operations. Manages app state persisten
 ```typescript
 import AppCheckpointService from '@tokenring-ai/checkpoint/AppCheckpointService';
 
-const appCheckpointService = app.requireServiceByType(AppCheckpointService);
+const appCheckpointService = app.requireService(AppCheckpointService);
 
 // Set checkpoint provider
 appCheckpointService.setCheckpointProvider(myProvider);
@@ -435,7 +435,7 @@ class MyProvider implements AgentCheckpointStorage {
 }
 
 // Set provider
-const service = agent.requireServiceByType(AgentCheckpointService);
+const service = agent.requireService(AgentCheckpointService);
 service.setCheckpointProvider(new MyProvider());
 ```
 
@@ -657,7 +657,7 @@ import { AppCheckpointState } from '@tokenring-ai/checkpoint/state/appCheckpoint
 ```typescript
 import AgentCheckpointService from '@tokenring-ai/checkpoint/AgentCheckpointService';
 
-const service = agent.requireServiceByType(AgentCheckpointService);
+const service = agent.requireService(AgentCheckpointService);
 
 // Save checkpoint
 const id1 = await service.saveAgentCheckpoint('Before Changes', agent);
@@ -681,7 +681,7 @@ await service.restoreAgentCheckpoint(id1, agent);
 ```typescript
 import AppCheckpointService from '@tokenring-ai/checkpoint/AppCheckpointService';
 
-const service = app.requireServiceByType(AppCheckpointService);
+const service = app.requireService(AppCheckpointService);
 
 // Save app checkpoint
 const id1 = await service.saveAppCheckpoint();
@@ -730,7 +730,7 @@ class CustomProvider implements AgentCheckpointStorage {
 }
 
 // Set provider
-const service = agent.requireServiceByType(AgentCheckpointService);
+const service = agent.requireService(AgentCheckpointService);
 service.setCheckpointProvider(new CustomProvider());
 ```
 
