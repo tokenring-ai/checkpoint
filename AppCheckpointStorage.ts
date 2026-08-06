@@ -11,7 +11,7 @@ export const AppCheckpointListItemSchema = StoredAppCheckpointSchema.pick({
   id: true,
   sessionId: true,
   hostname: true,
-  projectDirectory: true,
+  workspaceDirectory: true,
   createdAt: true,
 });
 

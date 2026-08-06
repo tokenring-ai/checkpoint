@@ -24,7 +24,7 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
       children: items
         .sort((a, b) => b.createdAt - a.createdAt)
         .map(cp => ({
-          name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - Session ${cp.sessionId}@${cp.hostname}:${cp.projectDirectory}`,
+          name: `⏰ ${new Date(cp.createdAt).toLocaleTimeString()} - Session ${cp.sessionId}@${cp.hostname}:${cp.workspaceDirectory}`,
           value: cp.id,
         })),
     }));

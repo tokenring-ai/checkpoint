@@ -24,7 +24,7 @@ async function displayCheckpointDetails(checkpointItem: AppSessionListItem, chec
     `Session ID: ${checkpointItem.sessionId}`,
     `Created: ${new Date(checkpointItem.createdAt).toLocaleString()}`,
     `Hostname: ${checkpointItem.hostname}`,
-    `Working Directory: ${checkpointItem.projectDirectory}`,
+    `Working Directory: ${checkpointItem.workspaceDirectory}`,
   ];
   try {
     const fullCheckpoint = await checkpointStorage.retrieveAppCheckpoint(checkpointItem.id);
@@ -40,7 +40,7 @@ async function displayCheckpointDetails(checkpointItem: AppSessionListItem, chec
     lines.push(`- Session ID: ${checkpointItem.sessionId}`);
     lines.push(`- Created: ${new Date(checkpointItem.createdAt).toLocaleString()}`);
     lines.push(`- Hostname: ${checkpointItem.hostname}`);
-    lines.push(`- Working Directory: ${checkpointItem.projectDirectory}`);
+    lines.push(`- Working Directory: ${checkpointItem.workspaceDirectory}`);
   }
   lines.push(`\n--- End of Checkpoint Details ---\n`);
   return lines.join("\n");

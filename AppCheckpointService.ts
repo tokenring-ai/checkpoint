@@ -59,7 +59,7 @@ export default class AppCheckpointService implements TokenRingService {
       sessionId: this.app.sessionId,
       createdAt: Date.now(),
       hostname: this.options.hostname,
-      projectDirectory: this.options.projectDirectory,
+      workspaceDirectory: this.app.appConfig.workingDirectory,
       state: this.app.generateStateCheckpoint(),
     });
   }

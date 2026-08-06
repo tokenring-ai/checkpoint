@@ -71,7 +71,7 @@ export default {
   checkpoint: {
     app: {
       restorePreviousState: false,  // Restore latest app checkpoint on startup
-      projectDirectory: '/path/to/project',  // Required: project directory for app state
+      workspaceDirectory: '/path/to/project',  // Required: project directory for app state
       hostname: 'localhost'  // Optional, defaults to current hostname
     },
     agent: {}  // Agent checkpoint configuration (currently empty)
@@ -94,7 +94,7 @@ import { CheckpointConfigSchema } from '@tokenring-ai/checkpoint';
 
 // AppCheckpointServiceSchema:
 // - restorePreviousState: boolean (default: false)
-// - projectDirectory: string (required)
+// - workspaceDirectory: string (required)
 // - hostname: string (default: current hostname from os.hostname())
 
 // AgentCheckpointServiceSchema:
@@ -110,7 +110,7 @@ import type {
 const validConfig = CheckpointConfigSchema.parse({
   app: {
     restorePreviousState: true,
-    projectDirectory: '/path/to/project',
+    workspaceDirectory: '/path/to/project',
     hostname: 'localhost'
   },
   agent: {}
@@ -328,7 +328,7 @@ A picked subset of `StoredAppCheckpointSchema` containing only listing fields (n
 - `id`: number
 - `sessionId`: string
 - `hostname`: string
-- `projectDirectory`: string
+- `workspaceDirectory`: string
 - `createdAt`: number (timestamp)
 
 ### RPC Schema
@@ -919,7 +919,7 @@ class MemoryAppCheckpointProvider implements AppCheckpointStorage {
       id: cp.id,
       sessionId: cp.sessionId,
       hostname: cp.hostname,
-      projectDirectory: cp.projectDirectory,
+      workspaceDirectory: cp.workspaceDirectory,
       createdAt: cp.createdAt
     }));
   }

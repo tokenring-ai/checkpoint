@@ -2,17 +2,18 @@ import { hostname } from "node:os";
 import type { ConfigFieldMeta } from "@tokenring-ai/app/config/metadata";
 import { z } from "zod";
 
-export const AppCheckpointServiceSchema = z.object({
-  restorePreviousState: z
-    .boolean()
-    .default(false)
-    .meta({ description: "Restore the most recent checkpoint automatically on startup" } satisfies ConfigFieldMeta),
-  projectDirectory: z.string().meta({ hidden: true } satisfies ConfigFieldMeta), // injected from --projectDirectory at launch
-  hostname: z
-    .string()
-    .default(hostname())
-    .meta({ hidden: true } satisfies ConfigFieldMeta), // injected from os.hostname()
-});
+export const AppCheckpointServiceSchema = z
+  .object({
+    restorePreviousState: z
+      .boolean()
+      .default(false)
+      .meta({ description: "Restore the most recent checkpoint automatically on startup" } satisfies ConfigFieldMeta),
+    hostname: z
+      .string()
+      .default(hostname())
+      .meta({ hidden: true } satisfies ConfigFieldMeta),
+  })
+  .prefault({});
 
 export type ParsedAppCheckpointConfig = z.output<typeof AppCheckpointServiceSchema>;
 
@@ -25,4 +26,5 @@ export const CheckpointConfigSchema = z
     app: AppCheckpointServiceSchema,
     agent: AgentCheckpointServiceSchema,
   })
+  .prefault({})
   .meta({ label: "Checkpoint", description: "Save and restore agent/app state snapshots" } satisfies ConfigFieldMeta);
