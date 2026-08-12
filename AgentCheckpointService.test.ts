@@ -18,14 +18,20 @@ const mockProvider: AgentCheckpointStorage = {
     agentType: "test-agent-type",
     sessionId: "test-session",
   }),
-  listAgentCheckpoints: mock().mockResolvedValue([
-    {
-      id: 1234,
-      name: "Test Checkpoint",
-      agentId: "test-agent-id",
-      createdAt: Date.now(),
-    },
-  ]),
+  listAgentCheckpoints: mock().mockResolvedValue({
+    items: [
+      {
+        id: 1234,
+        name: "Test Checkpoint",
+        agentId: "test-agent-id",
+        createdAt: Date.now(),
+      },
+    ],
+    total: 1,
+    hasMore: false,
+    limit: 50,
+    offset: 0,
+  }),
 };
 
 describe("AgentCheckpointService", () => {
@@ -41,7 +47,7 @@ describe("AgentCheckpointService", () => {
     // Service requires app and options
     service = new AgentCheckpointService(mockApp, {});
     service.setCheckpointProvider(mockProvider);
-    mockApp.addServices(service);
+    mockApp.addServices([service]);
 
     mockAgent = createTestingAgent(mockApp);
   });
@@ -124,10 +130,12 @@ describe("AgentCheckpointService", () => {
 
     describe("listAgentCheckpoints", () => {
       it("should list checkpoints successfully", async () => {
-        const checkpoints = await service.listAgentCheckpoints();
+        const result = await service.listAgentCheckpoints();
 
-        expect(checkpoints).toHaveLength(1);
-        expect(checkpoints[0]).toMatchObject({
+        expect(result.items).toHaveLength(1);
+        expect(result.total).toBe(1);
+        expect(result.hasMore).toBe(false);
+        expect(result.items[0]).toMatchObject({
           id: 1234,
           name: "Test Checkpoint",
           agentId: "test-agent-id",

@@ -21,14 +21,20 @@ describe("AgentCheckpointProvider Interface", () => {
         agentType: "mock-agent-type",
         sessionId: "mock-session",
       }),
-      listAgentCheckpoints: mock().mockResolvedValue([
-        {
-          id: 1234,
-          name: "Mock Checkpoint",
-          agentId: "mock-agent-id",
-          createdAt: Date.now(),
-        },
-      ]),
+      listAgentCheckpoints: mock().mockResolvedValue({
+        items: [
+          {
+            id: 1234,
+            name: "Mock Checkpoint",
+            agentId: "mock-agent-id",
+            createdAt: Date.now(),
+          },
+        ],
+        total: 1,
+        hasMore: false,
+        limit: 50,
+        offset: 0,
+      }),
     };
   });
 
@@ -168,8 +174,9 @@ describe("AgentCheckpointProvider Interface", () => {
     it("should list checkpoints", async () => {
       const result = await provider.listAgentCheckpoints();
 
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
+      expect(result.items).toHaveLength(1);
+      expect(result.total).toBe(1);
+      expect(result.items[0]).toMatchObject({
         id: expect.any(Number),
         name: expect.any(String),
         agentId: expect.any(String),

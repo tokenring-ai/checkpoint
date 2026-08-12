@@ -50,7 +50,7 @@ const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointStorage = agent.requireService(AppCheckpointService);
-  const checkpoints = await checkpointStorage.listAppCheckpoints();
+  const { items: checkpoints } = await checkpointStorage.listAppCheckpoints({ limit: 1000 });
   if (!checkpoints.length) return "No app checkpoint history found.";
 
   const checkpointsByDate = groupCheckpointsByDate(checkpoints);

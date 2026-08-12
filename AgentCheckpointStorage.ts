@@ -25,6 +25,33 @@ export const AgentCheckpointListItemSchema = StoredAgentCheckpointSchema.pick({
 
 export type AgentCheckpointListItem = z.output<typeof AgentCheckpointListItemSchema>;
 
+/** Options for filtered, paginated checkpoint listing. */
+export const CheckpointListOptionsSchema = z.object({
+  sessionId: z.string().optional(),
+  agentId: z.string().optional(),
+  agentType: z.string().optional(),
+  limit: z.number().int().positive().optional(),
+  offset: z.number().int().nonnegative().optional(),
+  /** Include only rows with createdAt strictly less than this timestamp (ms). */
+  before: z.number().optional(),
+  /** Include only rows with createdAt strictly greater than this timestamp (ms). */
+  after: z.number().optional(),
+  orderBy: z.enum(["createdAt", "id"]).optional(),
+  orderDir: z.enum(["ASC", "DESC"]).optional(),
+});
+
+export type CheckpointListOptions = z.input<typeof CheckpointListOptionsSchema>;
+
+export type PaginatedResult<T> = {
+  items: T[];
+  total: number;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+};
+
+export const DEFAULT_CHECKPOINT_LIST_LIMIT = 50;
+
 export interface AgentCheckpointStorage {
   displayName: string;
 
@@ -32,5 +59,5 @@ export interface AgentCheckpointStorage {
 
   retrieveAgentCheckpoint(id: number): MaybePromise<StoredAgentCheckpoint | null>;
 
-  listAgentCheckpoints(): MaybePromise<AgentCheckpointListItem[]>;
+  listAgentCheckpoints(options?: CheckpointListOptions): MaybePromise<PaginatedResult<AgentCheckpointListItem>>;
 }

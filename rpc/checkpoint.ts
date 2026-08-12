@@ -3,20 +3,21 @@ import type TokenRingApp from "@tokenring-ai/app";
 import { createPollingQueryStream } from "@tokenring-ai/rpc/createPollingQueryStream";
 import { createRPCEndpoint } from "@tokenring-ai/rpc/createRPCEndpoint";
 import AgentCheckpointService from "../AgentCheckpointService.ts";
+import type { AgentCheckpointListItem, CheckpointListOptions, PaginatedResult } from "../AgentCheckpointStorage.ts";
 import CheckpointRpcSchema from "./schema.ts";
 
-const streamCheckpoints = createPollingQueryStream({
+const streamCheckpoints = createPollingQueryStream<CheckpointListOptions, PaginatedResult<AgentCheckpointListItem>>({
   intervalMs: 5000,
-  poll: async (_args, app) => {
+  poll: async (args, app) => {
     const checkpointService = app.requireService(AgentCheckpointService);
-    return await checkpointService.listAgentCheckpoints();
+    return await checkpointService.listAgentCheckpoints(args);
   },
 });
 
 export default createRPCEndpoint(CheckpointRpcSchema, {
-  async listCheckpoints(_args, app: TokenRingApp) {
+  async listCheckpoints(args: CheckpointListOptions, app: TokenRingApp) {
     const checkpointService = app.requireService(AgentCheckpointService);
-    return await checkpointService.listAgentCheckpoints();
+    return await checkpointService.listAgentCheckpoints(args);
   },
 
   streamCheckpoints,

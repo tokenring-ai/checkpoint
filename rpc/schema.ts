@@ -1,10 +1,18 @@
 import type { RPCSchema } from "@tokenring-ai/rpc/types";
 import { SuccessSchema } from "@tokenring-ai/rpc/types";
 import { z } from "zod";
-import { AgentCheckpointListItemSchema, NamedAgentCheckpointSchema } from "../AgentCheckpointStorage.ts";
+import { AgentCheckpointListItemSchema, CheckpointListOptionsSchema, NamedAgentCheckpointSchema } from "../AgentCheckpointStorage.ts";
 
 export const CheckpointNotFoundSchema = z.object({
   status: z.literal("checkpointNotFound"),
+});
+
+export const PaginatedAgentCheckpointListSchema = z.object({
+  items: z.array(AgentCheckpointListItemSchema),
+  total: z.number(),
+  hasMore: z.boolean(),
+  limit: z.number(),
+  offset: z.number(),
 });
 
 export default {
@@ -13,13 +21,13 @@ export default {
   methods: {
     listCheckpoints: {
       type: "query",
-      input: z.object({}),
-      result: z.array(AgentCheckpointListItemSchema),
+      input: CheckpointListOptionsSchema.prefault({}),
+      result: PaginatedAgentCheckpointListSchema,
     },
     streamCheckpoints: {
       type: "stream",
-      input: z.object({}),
-      result: z.array(AgentCheckpointListItemSchema),
+      input: CheckpointListOptionsSchema.prefault({}),
+      result: PaginatedAgentCheckpointListSchema,
     },
     getCheckpoint: {
       type: "query",

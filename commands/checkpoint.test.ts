@@ -25,20 +25,26 @@ const mockAgent = {
 const mockCheckpointService = {
   saveAgentCheckpoint: mock().mockResolvedValue("checkpoint-id-123"),
   restoreAgentCheckpoint: mock().mockResolvedValue(undefined),
-  listAgentCheckpoints: mock().mockResolvedValue([
-    {
-      id: 1,
-      name: "Test Checkpoint 1",
-      agentId: "test-agent-id",
-      createdAt: Date.now() - 1000,
-    },
-    {
-      id: 2,
-      name: "Test Checkpoint 2",
-      agentId: "test-agent-id",
-      createdAt: Date.now(),
-    },
-  ]),
+  listAgentCheckpoints: mock().mockResolvedValue({
+    items: [
+      {
+        id: 1,
+        name: "Test Checkpoint 1",
+        agentId: "test-agent-id",
+        createdAt: Date.now() - 1000,
+      },
+      {
+        id: 2,
+        name: "Test Checkpoint 2",
+        agentId: "test-agent-id",
+        createdAt: Date.now(),
+      },
+    ],
+    total: 2,
+    hasMore: false,
+    limit: 1000,
+    offset: 0,
+  }),
 };
 
 describe("Checkpoint Commands", () => {
@@ -173,7 +179,13 @@ describe("Checkpoint Commands", () => {
       });
 
       it("should handle empty checkpoint list", async () => {
-        mockCheckpointService.listAgentCheckpoints.mockResolvedValueOnce([]);
+        mockCheckpointService.listAgentCheckpoints.mockResolvedValueOnce({
+          items: [],
+          total: 0,
+          hasMore: false,
+          limit: 1000,
+          offset: 0,
+        });
 
         const result = await listCheckpointCommand.execute({ args: {}, agent: mockAgent });
 

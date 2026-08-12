@@ -9,7 +9,7 @@ const inputSchema = {
 
 async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointService = agent.requireService(AgentCheckpointService);
-  const savedCheckpoints = await checkpointService.listAgentCheckpoints();
+  const { items: savedCheckpoints } = await checkpointService.listAgentCheckpoints({ limit: 1000 });
   if (savedCheckpoints.length === 0) return "No checkpoints saved. Use /agent checkpoint create to make one.";
 
   const grouped: Record<string, typeof savedCheckpoints> = {};

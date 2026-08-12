@@ -1,5 +1,6 @@
 import { type AppSessionCheckpoint, AppSessionCheckpointSchema } from "@tokenring-ai/app/schema";
 import z from "zod";
+import type { CheckpointListOptions, PaginatedResult } from "./AgentCheckpointStorage.ts";
 
 export const StoredAppCheckpointSchema = AppSessionCheckpointSchema.extend({
   id: z.number(),
@@ -17,6 +18,8 @@ export const AppCheckpointListItemSchema = StoredAppCheckpointSchema.pick({
 
 export type AppSessionListItem = z.output<typeof AppCheckpointListItemSchema>;
 
+export type { CheckpointListOptions, PaginatedResult };
+
 export interface AppCheckpointStorage {
   displayName: string;
 
@@ -24,7 +27,7 @@ export interface AppCheckpointStorage {
 
   retrieveAppCheckpoint(id: number): Promise<StoredAppCheckpoint | null>;
 
-  listAppCheckpoints(): Promise<AppSessionListItem[]>;
+  listAppCheckpoints(options?: CheckpointListOptions): Promise<PaginatedResult<AppSessionListItem>>;
 
   retrieveLatestAppCheckpoint(): Promise<StoredAppCheckpoint | null>;
 }

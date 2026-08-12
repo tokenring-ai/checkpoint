@@ -49,7 +49,7 @@ const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const checkpointStorage = agent.requireService(AgentCheckpointService);
-  const checkpoints = await checkpointStorage.listAgentCheckpoints();
+  const { items: checkpoints } = await checkpointStorage.listAgentCheckpoints({ limit: 1000 });
   if (!checkpoints.length) return "No checkpoint history found.";
 
   const checkpointsByAgent = groupCheckpointsByAgent(checkpoints);
